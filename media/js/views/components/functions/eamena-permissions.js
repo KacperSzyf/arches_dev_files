@@ -5,7 +5,7 @@ define(['knockout',
     'views/components/widgets/concept-multiselect',
     'views/components/simple-switch'],
     function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query) {
-
+        //Classes
         class Rule {
             constructor(selectedNodeGroup, selectedNode, selectedVal, userGroups) {
                 this.selectedNodeGroup = selectedNodeGroup
@@ -14,6 +14,34 @@ define(['knockout',
                 this.userGroups = userGroups
             }
         }
+
+        //Methods
+        const ruleExists = function(existingRules, newRule){
+            existingRules().forEach(rule => {
+
+                // if (ko.mapping.toJS(rule.selectedNodeGroup) == ko.mapping.toJS(newRule.selectedNodeGroup)
+                // && ko.mapping.toJS(rule.selectedNode) == ko.mapping.toJS(newRule.selectedNode)
+                // && ko.mapping.toJS(rules.selectedVal) == ko.mapping.toJS(newRule.selectedVal)
+                // && testUserGroup(ko.mapping.toJS(rule.userGroups)) == testUserGroup(ko.mapping.toJS(newRule.userGroups)))
+                console.log(ko.mapping.toJS(rule))
+                
+                if (JSON.stringify(ko.mapping.toJS(rule)) == JSON.stringify(newRule))
+                return true
+            });
+            console.log(ko.mapping.toJS(newRule))
+            return false
+        }
+
+        // const testUserGroup = function(existingUserGroup, newUserGroup){
+        //     let isTrue
+        //     newUserGroup.forEach(newUser => {
+        //         existingUserGroup.forEach(user => {
+        //             if(newUser.name == user.name && newUser.selectedVal == user.selectedVal) isTrue = true
+        //             else return isTrue = false
+        //         })
+        //     })
+        //     return isTrue
+        // }
 
         return ko.components.register('views/components/functions/eamena-permissions', {
             viewModel: function (params) {
@@ -35,7 +63,6 @@ define(['knockout',
 
                 //new rule
                 let newRule
-
                 //Blank Rules
                 this.selectedNodeGroup = ko.observable()
                 this.selectedNode = ko.observable()
@@ -87,7 +114,7 @@ define(['knockout',
 
                     })
 
-                });
+                });//Complete
                 
                 // Compare initialUsers to userGroups 
                 // If they are identical, do nothing.
@@ -110,35 +137,47 @@ define(['knockout',
                     })
                 }); //Complete
 
-
                 // return concept list 
                 this.selectedNode.subscribe(function (val) {
                     var concept_node = self.graph.nodes.find(function (node) {
                         return node.nodeid === val;
                     });
                     self.concept_node(concept_node);
-                });
+                });//Complete
 
 
-
+                this.userGroups.subscribe(val => console.log(ko.mapping.toJS(val)))
 
                 this.selectedNodeGroup.valueHasMutated();// Forces the node value to load into the node options when the template is renderer
-                this.selectedVal.subscribe(a => {
-                    console.log("function arg", a)
-                    console.log("selected val", ko.mapping.toJS(this.selectedVal))
-                    console.log("identity", ko.mapping.toJS(this.identityVal))
-                    console.log("in selected val" , a, ko.mapping.toJS(this.selectedVal))
-                }) // keep this for validation later
+                // this.selectedVal.subscribe(a => {
+                //     console.log("function arg", a)
+                //     console.log("selected val", ko.mapping.toJS(this.selectedVal))
+                //     //console.log("identity", ko.mapping.toJS(this.identityVal))
+                //     console.log("in selected val" , a, ko.mapping.toJS(this.selectedVal))
+                //     //create rule
+                //    // newRule = new Rule(this.selectedNodeGroup, this.selectedNode, this.selectedVal, this.userGroups)
+                // }) // keep this for validation later
 
-                //Create/Modify current rule when Identity vals change
-                if (this.identityVal) {
-                    console.log(this.identityVal)
-                    this.subscribe.identityVal(e => console.log("event", e))
-                }
+                // //Create/Modify current rule when Identity vals change
+                // if (this.identityVal) {
+                //     console.log(this.identityVal)
+                //     this.subscribe.identityVal(e => console.log("event", e))
+                // }
 
                 //methods
-                this.addRule = function(){}
-
+                this.addRule = function()
+                {  
+                    //console.log("rule", ko.mapping.toJS(this.selectedNodeGroup), ko.mapping.toJS(this.selectedNode), ko.mapping.toJS(this.selectedVal), ko.mapping.toJS(this.userGroups))
+                    let newRule = new Rule(this.selectedNodeGroup,
+                                                this.selectedNode,
+                                                this.selectedVal,
+                                                this.userGroups)
+                    // console.log(ko.mapping.toJS(newRule))
+                    // console.log(ruleExists(this.rules, newRule))
+                    if(ruleExists(this.rules, newRule)) this.rules.push(newRule)
+                    else alert("Rule already exists!")
+                }
+                    //TODO: Figure out why the function is alway false)
             },
             template: {
                 require: 'text!templates/views/components/functions/eamena-permissions.htm'
