@@ -1,130 +1,148 @@
 define(['knockout',
-        'viewmodels/function',
-        'viewmodels/concept-select',
-        'bindings/select2-query',
-        'views/components/widgets/concept-multiselect',
-        'views/components/simple-switch'],
-function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query) {
-    return ko.components.register('views/components/functions/eamena-permissions', {
-        viewModel: function(params) {
-            FunctionViewModel.apply(this, arguments);
-            var self = this;
-            var nodegroups = {};
-            this.rerender = ko.observable(true);
-            this.cards = ko.observableArray();
-            this.nodes = ko.observableArray([]);
-            this.concepts = ko.observableArray([]);
-            this.concept_nodes = ko.observableArray();
+    'viewmodels/function',
+    'viewmodels/concept-select',
+    'bindings/select2-query',
+    'views/components/widgets/concept-multiselect',
+    'views/components/simple-switch'],
+    function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query) {
 
-            this.concept_node = ko.observable();
+        class Rule {
+            constructor(selectedNodeGroup, selectedNode, selectedVal, userGroups) {
+                this.selectedNodeGroup = selectedNodeGroup
+                this.selectedNode = selectedNode
+                this.selectedVal = selectedVal
+                this.userGroups = userGroups
+            }
+        }
 
-            this.initialUsers = ko.observableArray();
+        return ko.components.register('views/components/functions/eamena-permissions', {
+            viewModel: function (params) {
+                FunctionViewModel.apply(this, arguments);
+                var self = this;
+                var nodegroups = {};
+                this.rerender = ko.observable(true);
+                this.cards = ko.observableArray();
+                this.nodes = ko.observableArray([]);
+                this.concepts = ko.observableArray([]);
+                this.concept_nodes = ko.observableArray();
+                this.concept_node = ko.observable();
+                this.initialUsers = ko.observableArray();
+                this.triggering_nodegroups = params.config.triggering_nodegroups;
 
-            this.selected_nodegroup = params.config.selected_nodegroup;
+                ConceptSelectViewModel.apply(this, [params]);
 
-            this.selected_node = params.config.selected_node;
-       
-            this.selected_val = params.config.selected_val;
+                this.rules = params.config.rules
 
-            this.userGroups = params.config.user_groups;
+                //new rule
+                let newRule
 
-            this.triggering_nodegroups = params.config.triggering_nodegroups;
+                //Blank Rules
+                this.selectedNodeGroup = ko.observable()
+                this.selectedNode = ko.observable()
+                this.selectedVal = ko.observable()
+                this.userGroups = ko.observableArray()
 
-            ConceptSelectViewModel.apply(this, [params]);
+                // Use the custom /get/users endpoint to get up to date list of users. ** must add the endpoint
+                $.getJSON("http://127.0.0.1:8000/get/users", function (data) {
+                    self.initialUsers(data)
+                }); //Complete
 
-            
-            // Use the custom /get/users endpoint to get up to date list of users. ** must add the endpoint
-            $.getJSON("http://127.0.0.1:8000/get/users", function(data){
-                // console.log("data", data)
-                self.initialUsers(data)
-                // console.log("init", self.initialUsers())
-            });
-
-            // console.log(self.initialUsers());
-
-            // Requires push method when we get to multiple rules 
-            this.selected_nodegroup.subscribe(function(val){
-                self.triggering_nodegroups([val]);
-            });
-
-            
-            // Compare initialUsers to userGroups 
-            // If they are identical, do nothing.
-            // If there is a group in initialUsers but not in UserGroups, ADD 
-            // If there is a group in userGroups but not in initialUsers, DELETE
-
-            //console.log(self.userGroups());
-
-            // This compares userGroups to initialUsers and if one is missing, add it.
-            this.initialUsers.subscribe(function(val){
-                val.forEach(function(v,i){
-                    if (self.userGroups().some((identity) => ko.unwrap(identity['identityName']) === v.name) === false){
-                        console.log("adding", v.name)
-                        var groupEntry = {
-                            identityName: ko.unwrap(v.name), 
-                            identityId: ko.unwrap(v.id), 
-                            identityType: ko.unwrap(v.type), 
-                            identityVal: ko.observable(true)
-                        }
-                        self.userGroups.push(groupEntry)
-                    }
-                })
-            });
-
-
-            // return concept list 
-            this.selected_node.subscribe(function(val){
-                var concept_node = self.graph.nodes.find(function(node){
-                    return node.nodeid === val;
+                // Requires push method when we get to multiple rules 
+                this.selectedNodeGroup.subscribe(function (val) {
+                    self.triggering_nodegroups([val]);
                 });
-                self.concept_node(concept_node);
-            });
+                
+                // Generates the list of nodegroups/cards to be used in the drop down        
+                this.graph.cards.forEach(function (card) {
+                    var found = !!_.find(this.graph.nodegroups, function (nodegroup) {
+                        return nodegroup.parentnodegroup_id === card.nodegroup_id
+                    }, this);
+                    if (!found && !(card.nodegroup_id in nodegroups)) {
+                        card.id = card.nodegroup_id;
+                        card.text = card.name; // Card Names
+                        this.cards.push(card); // Add to cards array
+                        nodegroups[card.nodegroup_id] = true;
+                    }
 
+                }, this); //NOTE: Might not be complete
 
-            // This generates the list of nodes once nodegroup is selected
-            this.selected_nodegroup.subscribe(function(){
-                self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
-                var nodes = self.graph.nodes.filter(function(node){
-                    return node.nodegroup_id === self.selected_nodegroup();
-                }).map(function(node){
+                // This generates the list of nodes once nodegroup is selected
+                this.selectedNodeGroup.subscribe(function () {
+                    self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
+                    var nodes = self.graph.nodes.filter(function (node) {
+                        return node.nodegroup_id === self.selectedNodeGroup();
+                    }).map(function (node) {
                         node.id = node.nodeid;
                         node.text = node.name;
                         return node;
+                    });
+                    // re-write nodes to only concept type nodes
+                    var nodes = nodes.filter(function (node) {
+                        return node.datatype === 'concept';
+                    })
+                    self.nodes.removeAll();
+                    self.nodes(nodes);
+                    self.rerender(true);
+                    self.nodes().forEach(function (node) {
+
+                    })
+
                 });
-                // re-write nodes to only concept type nodes
-                var nodes = nodes.filter(function(node){
-                    return node.datatype === 'concept';
-                })
-                self.nodes.removeAll();   
-                self.nodes(nodes);
-                self.rerender(true);
-                self.nodes().forEach(function(node){
-            
-                })
-
-            });
-
-            // Generates the list of nodegroups/cards to be used in the drop down        
-            this.graph.cards.forEach(function(card){
-                var found = !!_.find(this.graph.nodegroups, function(nodegroup){
-                    return nodegroup.parentnodegroup_id === card.nodegroup_id
-                }, this);
-                if(!found && !(card.nodegroup_id in nodegroups)){
-                    card.id = card.nodegroup_id;
-                    card.text = card.name; // Card Names
-                    this.cards.push(card); // Add to cards array
-                    nodegroups[card.nodegroup_id] = true;
-                }
                 
-            }, this);
+                // Compare initialUsers to userGroups 
+                // If they are identical, do nothing.
+                // If there is a group in initialUsers but not in UserGroups, ADD 
+                // If there is a group in userGroups but not in initialUsers, DELETE
 
-            this.selected_nodegroup.valueHasMutated();// Forces the node value to load into the node options when the template is renderer
-   
+                // This compares userGroups to initialUsers and if one is missing, add it.
+                this.initialUsers.subscribe(function (val) {
+                    val.forEach(function (v, i) {
+                        if (self.userGroups().some((identity) => ko.unwrap(identity['identityName']) === v.name) === false) {
+                            console.log("adding", v.name)
+                            var groupEntry = {
+                                identityName: ko.unwrap(v.name),
+                                identityId: ko.unwrap(v.id),
+                                identityType: ko.unwrap(v.type),
+                                identityVal: ko.observable(true)
+                            }
+                            self.userGroups.push(groupEntry)
+                        }
+                    })
+                }); //Complete
 
-        },
-        template: {
-            require: 'text!templates/views/components/functions/eamena-permissions.htm'
-        }
 
-    });
-})
+                // return concept list 
+                this.selectedNode.subscribe(function (val) {
+                    var concept_node = self.graph.nodes.find(function (node) {
+                        return node.nodeid === val;
+                    });
+                    self.concept_node(concept_node);
+                });
+
+
+
+
+                this.selectedNodeGroup.valueHasMutated();// Forces the node value to load into the node options when the template is renderer
+                this.selectedVal.subscribe(a => {
+                    console.log("function arg", a)
+                    console.log("selected val", ko.mapping.toJS(this.selectedVal))
+                    console.log("identity", ko.mapping.toJS(this.identityVal))
+                    console.log("in selected val" , a, ko.mapping.toJS(this.selectedVal))
+                }) // keep this for validation later
+
+                //Create/Modify current rule when Identity vals change
+                if (this.identityVal) {
+                    console.log(this.identityVal)
+                    this.subscribe.identityVal(e => console.log("event", e))
+                }
+
+                //methods
+                this.addRule = function(){}
+
+            },
+            template: {
+                require: 'text!templates/views/components/functions/eamena-permissions.htm'
+            }
+
+        });
+    })

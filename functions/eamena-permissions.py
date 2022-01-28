@@ -40,7 +40,7 @@ details = {
     "name": "EamenaPermissions",
     "type": "node",
     "description": "Just a sample demonstrating node group selection",
-    "defaultconfig": {"triggering_nodegroups":[], "selected_nodegroup": "", "selected_node":"","selected_val": [], "user_groups": []},
+    "defaultconfig": {"triggering_nodegroups":[], "rules":[]},
     "classname": "EamenaPermissions",
     "component": "views/components/functions/eamena-permissions",
     "functionid": "be239b0a-145d-4e27-bb71-beaa855dcc11"

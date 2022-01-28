@@ -4,85 +4,110 @@
   <div class="row widget-container">
     <div class="form-group">
       <div class="relative">
-          <div>
-            <label class="control-label widget-input-label"> {% trans "Node Group" %}</label>
-              <div class="widget-input" style="display:inline-block;"
-              data-bind="select2Query: {
+        <div>
+          <label class="control-label widget-input-label"> {% trans "Node Group" %}</label>
+          <div class="widget-input" style="display:inline-block;" data-bind="select2Query: {
                   select2Config: {
                       clickBubble: false,
                       disabled: false,
                       data: cards(),
-                      value: selected_nodegroup,
+                      value: selectedNodeGroup,
                       allowClear: false,
                       multiple: false,
                       placeholder: 'Select Node'}}">
-              </div>
           </div>
-          <!--ko if: selected_nodegroup()-->
-          <div class="widget-input">
-            <label class="control-label widget-input-label"> {% trans "Node" %}</label>
-              <div style="display:inline-block;"
-              data-bind="select2Query: {
+        </div>
+        <!--ko if: selectedNodeGroup()-->
+        <div class="widget-input">
+          <label class="control-label widget-input-label"> {% trans "Node" %}</label>
+          <div style="display:inline-block;" data-bind="select2Query: {
                   select2Config: {
                       clickBubble: false,
                       disabled: false,
                       data: nodes(),
-                      value: selected_node,
+                      value: selectedNode,
                       allowClear: false,
                       multiple: false,
                       placeholder: 'Select Node'}}">
-              </div>
           </div>
-          <!--/ko-->
-          <!--ko if: selected_node-->
-          <div class="widget-input">
-                    <div style="display:inline-block;" data-bind='component: {
+        </div>
+        <!--/ko-->
+        <!--ko if: selectedNode-->
+        <div class="widget-input">
+          <div style="display:inline-block;" data-bind='component: {
                         name: "concept-multiselect-widget",
                         params: {
                             config: {defaultValue:"", label:"Concept Value", options:[], placeholder:"Select an option"},
-                            value: selected_val,
+                            value: selectedVal,
                             node: concept_node(),
                             type: "resource-editor",
                         }
                     }'>
-                </div>
+          </div>
         </div>
         <!--/ko-->
-        <!--ko if: selected_val().length > 0-->
+        <!--ko if: selectedVal -->
 
-            <div class="permission-header">
-                <h4>{% trans 'Set Permissions for this instance' %}</h4>
-                <h5>{% trans 'By default only you have access to this record. You can set permissions for specific people or groups by selecting to whom you will grant access' %}</h5>
-            </div>
-            <div class="permission-control">
+        <div class="permission-header">
+          <h4>{% trans 'Set Permissions for this instance' %}</h4>
+          <h5>{% trans 'By default only you have access to this record. You can set permissions for specific people or
+            groups by selecting to whom you will grant access' %}</h5>
+        </div>
+        <div class="permission-control">
 
-            </div>
-            <div class="permission-list">
-            <div class="applied-permissions">
+        </div>
+        <div class="permission-list">
+          <div class="applied-permissions">
             <div class="permission-list-table">
-                <div class="permissions-list-header">
-                    <div class="identities-column">{% trans 'Person/Group' %}</div>
-                    <div class="permissions-column">{% trans 'Permissions' %}</div>
-                </div>
+              <div class="permissions-list-header">
+                <div class="identities-column">{% trans 'Person/Group' %}</div>
+                <div class="permissions-column">{% trans 'Permissions' %}</div>
+              </div>
 
-                <div class="permissions-list-table-body">
-                    <div data-bind="foreach: userGroups">
-                      <div class="permissions-table-row"> 
-                      <div style="display: inline-flex; height: 20px;">
+              <div class="permissions-list-table-body">
+                <div data-bind="foreach: userGroups">
+                  <div class="permissions-table-row">
+                    <div style="display: inline-flex; height: 20px;">
                       <div class="identities-column"><span data-bind="text: $data.identityName"></span></div>
-                      <div class="permissions-column"><span class='switch-small' data-bind="component: { name: 'views/components/simple-switch', params: {value: $data.identityVal}}"></span></div>
+                      <div class="permissions-column"><span class='switch-small'
+                          data-bind="component: { name: 'views/components/simple-switch', params: {value: $data.identityVal}}"></span>
+                      </div>
                     </div>
-                    </div>
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-                
-       
-        <!--/ko-->
         </div>
+        <!--/ko-->
+        <table>
+          <thead>
+            <th>Node group</th>
+            <th>Node</th>
+            <th>Value</th>
+          </thead>
+          
+          <!-- <span data-bind="click: function() {console.log(ko.mapping.toJS(rules()))}">DUMP VIEW MODEL/DUMP RULES | </span>
+          <span data-bind="click: function() {this.rules.removeAll()}"> | Remove ALL!</span> foreach: rules -->
+          <tbody data-bind="">
+            <tr> 
+              <td><span data-bind="">a</span></td>
+              <td><span data-bind="">b</span></td>
+              <td><span data-bind="">c</span></td>
+              <td><a href="#" style="color: blue;" data-bind="">Edit</a></td>
+              <td><a href="#" style="color: red;" data-bind="">Remove</a></td>
+            </tr>
+          </table>
+          <button>Add Rule</button>
+      </div>
     </div>
   </div>
 </div>
-          
+
+<tr> 
+  <!-- <td><span data-bind="text: $parent.getNodeName($data.selectedNodeGroup())"></span></td>
+  <td><span data-bind="text: $parent.getNodeName($data.selectedNode())"></span></td>
+  <td><span data-bind="text: $parent.getConceptText($data.selectedVal())"></span></td>
+  <td><a href="#" style="color: blue;" data-bind="click: $parent.editRule.bind($data)">Edit</a></td>
+  <td><a href="#" style="color: red;" data-bind="click: $parent.removeRule">Remove</a></td>
+</tr> -->
