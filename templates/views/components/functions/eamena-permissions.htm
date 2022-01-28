@@ -1,0 +1,88 @@
+{% load i18n %}
+
+<div style="height: 100%;">
+  <div class="row widget-container">
+    <div class="form-group">
+      <div class="relative">
+          <div>
+            <label class="control-label widget-input-label"> {% trans "Node Group" %}</label>
+              <div class="widget-input" style="display:inline-block;"
+              data-bind="select2Query: {
+                  select2Config: {
+                      clickBubble: false,
+                      disabled: false,
+                      data: cards(),
+                      value: selected_nodegroup,
+                      allowClear: false,
+                      multiple: false,
+                      placeholder: 'Select Node'}}">
+              </div>
+          </div>
+          <!--ko if: selected_nodegroup()-->
+          <div class="widget-input">
+            <label class="control-label widget-input-label"> {% trans "Node" %}</label>
+              <div style="display:inline-block;"
+              data-bind="select2Query: {
+                  select2Config: {
+                      clickBubble: false,
+                      disabled: false,
+                      data: nodes(),
+                      value: selected_node,
+                      allowClear: false,
+                      multiple: false,
+                      placeholder: 'Select Node'}}">
+              </div>
+          </div>
+          <!--/ko-->
+          <!--ko if: selected_node-->
+          <div class="widget-input">
+                    <div style="display:inline-block;" data-bind='component: {
+                        name: "concept-multiselect-widget",
+                        params: {
+                            config: {defaultValue:"", label:"Concept Value", options:[], placeholder:"Select an option"},
+                            value: selected_val,
+                            node: concept_node(),
+                            type: "resource-editor",
+                        }
+                    }'>
+                </div>
+        </div>
+        <!--/ko-->
+        <!--ko if: selected_val().length > 0-->
+
+            <div class="permission-header">
+                <h4>{% trans 'Set Permissions for this instance' %}</h4>
+                <h5>{% trans 'By default only you have access to this record. You can set permissions for specific people or groups by selecting to whom you will grant access' %}</h5>
+            </div>
+            <div class="permission-control">
+
+            </div>
+            <div class="permission-list">
+            <div class="applied-permissions">
+            <div class="permission-list-table">
+                <div class="permissions-list-header">
+                    <div class="identities-column">{% trans 'Person/Group' %}</div>
+                    <div class="permissions-column">{% trans 'Permissions' %}</div>
+                </div>
+
+                <div class="permissions-list-table-body">
+                    <div data-bind="foreach: userGroups">
+                      <div class="permissions-table-row"> 
+                      <div style="display: inline-flex; height: 20px;">
+                      <div class="identities-column"><span data-bind="text: $data.identityName"></span></div>
+                      <div class="permissions-column"><span class='switch-small' data-bind="component: { name: 'views/components/simple-switch', params: {value: $data.identityVal}}"></span></div>
+                    </div>
+                    </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+                
+       
+        <!--/ko-->
+        </div>
+    </div>
+  </div>
+</div>
+          
