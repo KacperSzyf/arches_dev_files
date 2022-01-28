@@ -54,7 +54,9 @@ class EamenaPermissions(BaseFunction):
 
     def save(self, tile, request):
         print("!!! Calling EamenaPermissions function save...")
-
+        print("Remember there is just a return statment here!!!!!!!!!!!!!!!!!!!!!!")
+        
+        return
         data = tile.data
         node = self.config['selected_node']
         value = self.config['selected_val']
