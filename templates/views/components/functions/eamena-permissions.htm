@@ -105,15 +105,15 @@
           <th>Value</th>
         </thead>
     
-        <!-- <span data-bind="click: function() {console.log(ko.mapping.toJS(rules()))}">DUMP VIEW MODEL/DUMP RULES | </span>
-        <span data-bind="click: function() {this.rules.removeAll()}"> | Remove ALL!</span> foreach: rules -->
-        <tbody data-bind="">
+        <button data-bind="click: function() {console.log(ko.mapping.toJS(rules()))}">DUMP VIEW MODEL/DUMP RULES | </button>
+        <button data-bind="click: function() {this.rules.removeAll()}"> | Remove ALL!</button>
+        <tbody data-bind="foreach: rules">
           <tr>
-            <td><span data-bind="">a</span></td>
-            <td><span data-bind="">b</span></td>
-            <td><span data-bind="">c</span></td>
+            <td><span data-bind="text: ko.mapping.toJS($data.selectedNodeGroup())""></span></td>
+            <td><span data-bind="text: ko.mapping.toJS($data.selectedNode())""></span></td>
+            <td><span data-bind="text: $parent.getConceptText($data.selectedVal()[0])""></span></td>
             <td><a href="#" style="color: blue" data-bind="">Edit</a></td>
-            <td><a href="#" style="color: red" data-bind="">Remove</a></td>
+            <td><a href="#" style="color: red" data-bind="click: $parent.removeRule">Remove</a></td>
           </tr>
         </tbody>
       </table>
