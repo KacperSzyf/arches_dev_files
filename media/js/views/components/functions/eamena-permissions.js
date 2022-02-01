@@ -16,16 +16,23 @@ define([
             this.selectedVal = selectedVal;
             this.userGroups = userGroups;
         }
+
+        rulesetToJson(){
+            let ruleset = JSON.stringify(this.selectedNodeGroup()) + JSON.stringify(this.selectedNode()) + JSON.stringify(this.selectedVal())
+
+            return ruleset
+        }
     } // COMPLETE::
 
     //Methods
     const ruleExists = function (existingRules, newRule) {
-
+        console.log(newRule.rulesetToJson())
         for (let i = 0; i < existingRules().length; i++) {
-            console.log(ko.mapping.toJS(existingRules()[i]) , i)
-            if(existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
-            && existingRules()[i].selectedNode() == newRule.selectedNode()
-            && existingRules()[i].selectedVal() == newRule.selectedVal()) 
+            // console.log(ko.mapping.toJS(existingRules()[i]) , i)
+            // if(existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
+            // && existingRules()[i].selectedNode() == newRule.selectedNode()
+            // && existingRules()[i].selectedVal() == newRule.selectedVal()) 
+            if(existingRules()[i].rulesetToJson() == newRule.rulesetToJson())
             return true //Rule has been found
         }
             //return or break do not exit the for each loop
@@ -237,4 +244,4 @@ define([
 //                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
 //                 arches.url is undefined even though I'm importing arches at the top, what do? ------ COMPLETE:
 //                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else FIXME: is selectedVal is not null
-//                  Should we ad some functionality to update the rule if they push a rule, and then decided to change the permissions on the same screen  ?
+//                 Should we ad some functionality to update the rule if they push a rule, and then decided to change the permissions on the same screen  ?
