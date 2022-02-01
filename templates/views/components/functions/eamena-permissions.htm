@@ -17,7 +17,7 @@
                       disabled: false,
                       data: cards(),
                       value: selectedNodeGroup,
-                      allowClear: false,
+                      allowClear: true,
                       multiple: false,
                       placeholder: 'Select Node'}}"
           ></div>
@@ -35,7 +35,7 @@
                       disabled: false,
                       data: nodes(),
                       value: selectedNode,
-                      allowClear: false,
+                      allowClear: true,
                       multiple: false,
                       placeholder: 'Select Node'}}"
           ></div>
@@ -111,8 +111,8 @@
           <tr>
             <td><span data-bind="text: ko.mapping.toJS($data.selectedNodeGroup())""></span></td>
             <td><span data-bind="text: ko.mapping.toJS($data.selectedNode())""></span></td>
-            <td><span data-bind="text: $parent.getConceptText($data.selectedVal()[0])""></span></td>
-            <td><a href="#" style="color: blue" data-bind="">Edit</a></td>
+            <!-- <td><span data-bind="text: $parent.getConceptText($data.selectedVal()[0])""></span></td> -->
+            <td><a href="#" style="color: blue" data-bind="click: $parent.editRule.bind($data)">Edit</a></td>
             <td><a href="#" style="color: red" data-bind="click: $parent.removeRule">Remove</a></td>
           </tr>
         </tbody>

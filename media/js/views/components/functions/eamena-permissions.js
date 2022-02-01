@@ -6,13 +6,7 @@ define([
     "views/components/widgets/concept-multiselect",
     "views/components/simple-switch",
     "arches",
-], function (
-    ko,
-    FunctionViewModel,
-    ConceptSelectViewModel,
-    select2Query,
-    arches,
-    urls
+], function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query,conceptMultiselect, simpleSwitch, arches
 ) {
     //Classes
     class Rule {
@@ -32,7 +26,24 @@ define([
             //might have to change it to not compare groupvals
         });
         return true; // It is true that a rule has not been found
-    };
+    }
+
+    // const matchRule = function (existingRules, selectedNode, selectedNodeGroup, selectedVal) {
+    //     let foundRule
+    //     existingRules().forEach(rule => {
+    //         if (rule.selectedNode() == selectedNode
+    //             && rule.selectedNodeGroup() == selectedNodeGroup
+    //             && rule.selectedVal() == selectedVal) 
+    //             {
+    //             console.log("rule in forif", rule)
+    //             foundRule = rule;
+    //             }
+    //     })
+
+    //     console.log("found rule",foundRule)
+    //     console.log(ko.mapping.toJS(foundRule))
+    //     return foundRule
+    // }
 
     return ko.components.register(
         "views/components/functions/eamena-permissions",
@@ -90,6 +101,7 @@ define([
 
                 // This generates the list of nodes once nodegroup is selected
                 this.selectedNodeGroup.subscribe(function () {
+                    console.log("fired in nodegroup")
                     self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
                     var nodes = self.graph.nodes
                         .filter(function (node) {
@@ -145,23 +157,21 @@ define([
                     self.concept_node(concept_node);
                 }); //Complete
 
-                //this.userGroups.subscribe(val => console.log(ko.mapping.toJS(val)))
-
                 this.selectedNodeGroup.valueHasMutated(); // Forces the node value to load into the node options when the template is renderer
-                // this.selectedVal.subscribe(a => {
-                //     console.log("function arg", a)
-                //     console.log("selected val", ko.mapping.toJS(this.selectedVal))
-                //     //console.log("identity", ko.mapping.toJS(this.identityVal))
-                //     console.log("in selected val" , a, ko.mapping.toJS(this.selectedVal))
-                //     //create rule
-                //    // newRule = new Rule(this.selectedNodeGroup, this.selectedNode, this.selectedVal, this.userGroups)
-                // }) // keep this for validation later
 
-                // //Create/Modify current rule when Identity vals change
-                // if (this.identityVal) {
-                //     console.log(this.identityVal)
-                //     this.subscribe.identityVal(e => console.log("event", e))
-                // }
+                //TODO: Figure out why its firing twice
+                this.selectedVal.subscribe(function() {
+                    console.log("fired in select val sub")
+                    // check if rule combination already exists, if so use the existing rule 
+                    let existingRule = matchRule(this.rules, this.selectedNode(), this.selectedNodeGroup(), this.selectedVal())
+                    console.log("existing rule", existingRule)
+                    if (existingRule) {
+                        console.log("fired!")
+                        this.editRule(existingRule)
+                    }
+                }
+                )
+
                 //methods
                 this.addRule = function () {
                     console.log("clicked!");
@@ -173,16 +183,27 @@ define([
                         this.userGroups
                     );
                     console.log(newRule);
-                    if (ruleExists(this.rules, newRule)) this.rules.push(newRule);
+                    if (ruleExists(self.rules, newRule)) self.rules.push(newRule);
                     else alert("Rule already exists!");
                 };
-                //TODO: Figure out why the function is alway false)
+                //FIXME: Figure out why the function is alway false)
 
                 this.removeRule = function () {
                     console.log("removing this:", ko.mapping.toJS(this));
                     self.rules.remove(this);
                 };
 
+                //FIXME: figure out why the front end is not populating
+                this.editRule = function (rule) {
+                    self.selectedNode( rule.selectedNode()) 
+                    self.selectedNodeGroup = rule.selectedNodeGroup
+                    self.selectedVal = rule.selectedVal
+                    self.userGroups = rule.userGroups
+                    console.log("this",ko.mapping.toJS(self))
+                    self.rules.remove(rule)
+                }
+
+                //FIXME:fixed urls not defined error
                 this.getConceptText = function (uuid) {
                     const conceptName = $.ajax(
                         arches.urls.concept_value + "?valueid=" + ko.unwrap(uuid),
@@ -202,3 +223,11 @@ define([
         }
     );
 });
+
+
+//TODO: Questions : 
+//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) 
+//                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
+//                 arches.url is undefined even though I'm importing arches at the top, what do? -- possibly fixed
+//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else
+
