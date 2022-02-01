@@ -16,7 +16,7 @@ define([
             this.selectedVal = selectedVal;
             this.userGroups = userGroups;
         }
-    } // Complete
+    } // COMPLETE
 
     //Methods
     const ruleExists = function (existingRules, newRule) {
@@ -75,7 +75,7 @@ define([
                 // Use the custom /get/users endpoint to get up to date list of users. ** must add the endpoint
                 $.getJSON("http://127.0.0.1:8000/get/users", function (data) {
                     self.initialUsers(data);
-                }); //Complete
+                }); //COMPLETE
 
                 // Requires push method when we get to multiple rules
                 this.selectedNodeGroup.subscribe(function (val) {
@@ -120,7 +120,7 @@ define([
                     self.nodes(nodes);
                     self.rerender(true);
                     self.nodes().forEach(function (node) { });
-                }); //Complete
+                }); //COMPLETE
 
                 // Compare initialUsers to userGroups
                 // If they are identical, do nothing.
@@ -147,7 +147,7 @@ define([
                             self.userGroups.push(groupEntry);
                         }
                     });
-                }); //Complete
+                }); //COMPLETE
 
                 // Return concept list
                 this.selectedNode.subscribe(function (val) {
@@ -155,7 +155,7 @@ define([
                         return node.nodeid === val;
                     });
                     self.concept_node(concept_node);
-                }); //Complete
+                }); //COMPLETE
 
                 this.selectedNodeGroup.valueHasMutated(); // Forces the node value to load into the node options when the template is renderer
 
@@ -191,7 +191,7 @@ define([
                 this.removeRule = function () {
                     console.log("removing this:", ko.mapping.toJS(this));
                     self.rules.remove(this);
-                };//Complete
+                };//COMPLETE
 
                 this.editRule = function (rule) {
                     self.selectedNode(rule.selectedNode()) 
@@ -200,19 +200,21 @@ define([
                     self.userGroups(rule.userGroups())
                     console.log("this",ko.mapping.toJS(self))
                     self.rules.remove(rule)
-                }// Complete
+                }// COMPLETE
 
-                //FIXME:fixed urls not defined error
                 this.getConceptText = function (uuid) {
-                    const conceptName = $.ajax(
+                    let conceptName
+                    $.ajax(
                         arches.urls.concept_value + "?valueid=" + ko.unwrap(uuid),
                         {
                             dataType: "json",
-                            async: false,
+                            async: false
                         }
                     ).done(function (data) {
-                        console.log(data);
+                        console.log(data.value);
+                        conceptName = data.value
                     });
+                    return conceptName
                 };
             },
             template: {
