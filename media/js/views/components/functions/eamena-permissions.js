@@ -163,12 +163,12 @@ define([
                 this.selectedVal.subscribe(function() {
                     console.log("fired in select val sub")
                     // check if rule combination already exists, if so use the existing rule 
-                    let existingRule = matchRule(this.rules, this.selectedNode(), this.selectedNodeGroup(), this.selectedVal())
-                    console.log("existing rule", existingRule)
-                    if (existingRule) {
-                        console.log("fired!")
-                        this.editRule(existingRule)
-                    }
+                    // let existingRule = matchRule(this.rules, this.selectedNode(), this.selectedNodeGroup(), this.selectedVal())
+                    // console.log("existing rule", existingRule)
+                    // if (existingRule) {
+                    //     console.log("fired!")
+                    //     this.editRule(existingRule)
+                    // }
                 }
                 )
 
@@ -191,17 +191,16 @@ define([
                 this.removeRule = function () {
                     console.log("removing this:", ko.mapping.toJS(this));
                     self.rules.remove(this);
-                };
+                };//Complete
 
-                //FIXME: figure out why the front end is not populating
                 this.editRule = function (rule) {
-                    self.selectedNode( rule.selectedNode()) 
-                    self.selectedNodeGroup = rule.selectedNodeGroup
-                    self.selectedVal = rule.selectedVal
-                    self.userGroups = rule.userGroups
+                    self.selectedNode(rule.selectedNode()) 
+                    self.selectedNodeGroup(rule.selectedNodeGroup())
+                    self.selectedVal(rule.selectedVal())
+                    self.userGroups(rule.userGroups())
                     console.log("this",ko.mapping.toJS(self))
                     self.rules.remove(rule)
-                }
+                }// Complete
 
                 //FIXME:fixed urls not defined error
                 this.getConceptText = function (uuid) {
@@ -226,8 +225,8 @@ define([
 
 
 //TODO: Questions : 
-//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) 
+//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) ----- DONE
 //                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
 //                 arches.url is undefined even though I'm importing arches at the top, what do? -- possibly fixed
-//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else
+//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else FIXME: is selectedVal is not null
 
