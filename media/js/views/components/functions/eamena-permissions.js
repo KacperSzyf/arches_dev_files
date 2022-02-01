@@ -16,16 +16,22 @@ define([
             this.selectedVal = selectedVal;
             this.userGroups = userGroups;
         }
-    } // COMPLETE
+    } // COMPLETE::
 
     //Methods
     const ruleExists = function (existingRules, newRule) {
-        existingRules().forEach((rule) => {
-            if (JSON.stringify(ko.mapping.toJS(rule)) == JSON.stringify(newRule))
-                return false; // It is not true that a rule has ben found //#
-            //might have to change it to not compare groupvals
-        });
-        return true; // It is true that a rule has not been found
+
+        for (let i = 0; i < existingRules().length; i++) {
+            console.log(ko.mapping.toJS(existingRules()[i]) , i)
+            if(existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
+            && existingRules()[i].selectedNode() == newRule.selectedNode()
+            && existingRules()[i].selectedVal() == newRule.selectedVal()) 
+            return true //Rule has been found
+        }
+            //return or break do not exit the for each loop
+            //REVIEW: Do I need to compare users? Since we're checking the building blocks first 
+            //and then matching them into  the rule?
+        return false; //Rule has not been found
     }
 
     // const matchRule = function (existingRules, selectedNode, selectedNodeGroup, selectedVal) {
@@ -75,7 +81,7 @@ define([
                 // Use the custom /get/users endpoint to get up to date list of users. ** must add the endpoint
                 $.getJSON("http://127.0.0.1:8000/get/users", function (data) {
                     self.initialUsers(data);
-                }); //COMPLETE
+                }); //COMPLETE:
 
                 // Requires push method when we get to multiple rules
                 this.selectedNodeGroup.subscribe(function (val) {
@@ -120,7 +126,7 @@ define([
                     self.nodes(nodes);
                     self.rerender(true);
                     self.nodes().forEach(function (node) { });
-                }); //COMPLETE
+                }); //COMPLETE:
 
                 // Compare initialUsers to userGroups
                 // If they are identical, do nothing.
@@ -147,7 +153,7 @@ define([
                             self.userGroups.push(groupEntry);
                         }
                     });
-                }); //COMPLETE
+                }); //COMPLETE:
 
                 // Return concept list
                 this.selectedNode.subscribe(function (val) {
@@ -155,7 +161,7 @@ define([
                         return node.nodeid === val;
                     });
                     self.concept_node(concept_node);
-                }); //COMPLETE
+                }); //COMPLETE:
 
                 this.selectedNodeGroup.valueHasMutated(); // Forces the node value to load into the node options when the template is renderer
 
@@ -183,15 +189,15 @@ define([
                         this.userGroups
                     );
                     console.log(newRule);
-                    if (ruleExists(self.rules, newRule)) self.rules.push(newRule);
-                    else alert("Rule already exists!");
+                    if (ruleExists(self.rules, newRule)) alert("Rule already exists!");
+                    else self.rules.push(newRule);
                 };
-                //FIXME: Figure out why the function is alway false)
+                //COMPLETE:
 
                 this.removeRule = function () {
                     console.log("removing this:", ko.mapping.toJS(this));
                     self.rules.remove(this);
-                };//COMPLETE
+                };//COMPLETE:
 
                 this.editRule = function (rule) {
                     self.selectedNode(rule.selectedNode()) 
@@ -200,7 +206,7 @@ define([
                     self.userGroups(rule.userGroups())
                     console.log("this",ko.mapping.toJS(self))
                     self.rules.remove(rule)
-                }// COMPLETE
+                }// COMPLETE::
 
                 this.getConceptText = function (uuid) {
                     let conceptName
@@ -226,9 +232,9 @@ define([
 });
 
 
-//TODO: Questions : 
-//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) ----- DONE
+//REVIEW: Questions : 
+//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) ----- COMPLETE:
 //                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
-//                 arches.url is undefined even though I'm importing arches at the top, what do? -- possibly fixed
+//                 arches.url is undefined even though I'm importing arches at the top, what do? ------ COMPLETE:
 //                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else FIXME: is selectedVal is not null
-
+//                  Should we ad some functionality to update the rule if they push a rule, and then decided to change the permissions on the same screen  ?
