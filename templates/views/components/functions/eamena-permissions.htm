@@ -104,13 +104,12 @@
           <th>Node</th>
           <th>Value</th>
         </thead>
-    
-        <button data-bind="click: function() {console.log(ko.mapping.toJS(rules()))}">DUMP VIEW MODEL/DUMP RULES | </button>
+        <button data-bind="click: function() {console.log(ko.mapping.toJS(rules()))}">DUMP RULES | </button>
         <button data-bind="click: function() {this.rules.removeAll()}"> | Remove ALL!</button>
         <tbody data-bind="foreach: rules">
           <tr>
-            <td><span data-bind="text: ko.mapping.toJS($data.selectedNodeGroup())""></span></td>
-            <td><span data-bind="text: ko.mapping.toJS($data.selectedNode())""></span></td>
+            <td><span data-bind="text: $parent.getNodeText($data.selectedNodeGroup())""></span></td>
+            <td><span data-bind="text: $parent.getNodeText($data.selectedNode())""></span></td>
             <td><span data-bind="text: $parent.getConceptText($data.selectedVal())""></span></td>
             <td><a href="#" style="color: blue" data-bind="click: $parent.editRule.bind($data)">Edit</a></td>
             <td><a href="#" style="color: red" data-bind="click: $parent.removeRule">Remove</a></td>

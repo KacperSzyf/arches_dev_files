@@ -6,7 +6,7 @@ define([
     "views/components/widgets/concept-multiselect",
     "views/components/simple-switch",
     "arches",
-], function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query,conceptMultiselect, simpleSwitch, arches
+], function (ko, FunctionViewModel, ConceptSelectViewModel, select2Query, conceptMultiselect, simpleSwitch, arches
 ) {
     //Classes
     class Rule {
@@ -17,46 +17,34 @@ define([
             this.userGroups = userGroups;
         }
 
-        rulesetToJson(){
+        rulesetToJson() {
             let ruleset = JSON.stringify(this.selectedNodeGroup()) + JSON.stringify(this.selectedNode()) + JSON.stringify(this.selectedVal())
-
             return ruleset
         }
     } // COMPLETE::
 
     //Methods
     const ruleExists = function (existingRules, newRule) {
-        console.log(newRule.rulesetToJson())
         for (let i = 0; i < existingRules().length; i++) {
-            // console.log(ko.mapping.toJS(existingRules()[i]) , i)
-            // if(existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
-            // && existingRules()[i].selectedNode() == newRule.selectedNode()
-            // && existingRules()[i].selectedVal() == newRule.selectedVal()) 
-            if(existingRules()[i].rulesetToJson() == newRule.rulesetToJson())
-            return true //Rule has been found
+            console.log(ko.mapping.toJS(existingRules()[i]))
+            if (existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
+                && existingRules()[i].selectedNode() == newRule.selectedNode()
+                && existingRules()[i].selectedVal() == newRule.selectedVal())
+                return true //Rule has been found
         }
-            //return or break do not exit the for each loop
-            //REVIEW: Do I need to compare users? Since we're checking the building blocks first 
-            //and then matching them into  the rule?
+        //REVIEW: Do I need to compare users? Since we're checking the building blocks first 
+        //and then matching them into  the rule?
         return false; //Rule has not been found
     }
 
-    // const matchRule = function (existingRules, selectedNode, selectedNodeGroup, selectedVal) {
-    //     let foundRule
-    //     existingRules().forEach(rule => {
-    //         if (rule.selectedNode() == selectedNode
-    //             && rule.selectedNodeGroup() == selectedNodeGroup
-    //             && rule.selectedVal() == selectedVal) 
-    //             {
-    //             console.log("rule in forif", rule)
-    //             foundRule = rule;
-    //             }
-    //     })
-
-    //     console.log("found rule",foundRule)
-    //     console.log(ko.mapping.toJS(foundRule))
-    //     return foundRule
-    // }
+    const matchRule = function (existingRules, selectedNode, selectedNodeGroup, selectedVal) {
+        for (let i = 0; i < existingRules().length; i++) {
+            if (existingRules()[i].selectedNodeGroup() == selectedNodeGroup()
+                && existingRules()[i].selectedNode() == selectedNode()
+                && existingRules()[i].selectedVal() == selectedVal())
+                return existingRules()[i]
+        }
+    }
 
     return ko.components.register(
         "views/components/functions/eamena-permissions",
@@ -164,6 +152,7 @@ define([
 
                 // Return concept list
                 this.selectedNode.subscribe(function (val) {
+                    console.log("val", val)
                     var concept_node = self.graph.nodes.find(function (node) {
                         return node.nodeid === val;
                     });
@@ -172,18 +161,19 @@ define([
 
                 this.selectedNodeGroup.valueHasMutated(); // Forces the node value to load into the node options when the template is renderer
 
-                //TODO: Figure out why its firing twice
-                this.selectedVal.subscribe(function() {
-                    console.log("fired in select val sub")
+                this.selectedVal.subscribe(function () {
                     // check if rule combination already exists, if so use the existing rule 
-                    // let existingRule = matchRule(this.rules, this.selectedNode(), this.selectedNodeGroup(), this.selectedVal())
-                    // console.log("existing rule", existingRule)
-                    // if (existingRule) {
-                    //     console.log("fired!")
-                    //     this.editRule(existingRule)
-                    // }
+                    if (self.rules().length > 0) {
+                        let existingRule = matchRule(self.rules, self.selectedNode, self.selectedNodeGroup, self.selectedVal)
+                        if (existingRule) {
+                            console.log("fired!")
+                            self.editRule(existingRule)
+
+                        }
+                    }
+
                 }
-                )
+                )//COMPLETE:
 
                 //methods
                 this.addRule = function () {
@@ -207,11 +197,10 @@ define([
                 };//COMPLETE:
 
                 this.editRule = function (rule) {
-                    self.selectedNode(rule.selectedNode()) 
+                    self.selectedNode(rule.selectedNode())
                     self.selectedNodeGroup(rule.selectedNodeGroup())
-                    self.selectedVal(rule.selectedVal())
                     self.userGroups(rule.userGroups())
-                    console.log("this",ko.mapping.toJS(self))
+                    console.log("this", ko.mapping.toJS(self))
                     self.rules.remove(rule)
                 }// COMPLETE::
 
@@ -228,7 +217,43 @@ define([
                         conceptName = data.value
                     });
                     return conceptName
-                };
+                };//COMPLETE:
+
+                this.getNodeText = function (uuid) {
+                    const nodeText = self.graph.nodes.filter(function (node) {
+                        node.nodegroup_id = uuid;
+                        console.log(node)
+                        return node
+                    }).map(function (node) {
+                        node.id = node.nodeid;
+                        node.text = node.name;
+                        console.log(node.name)
+                        return node.text;
+                    });
+                    console.log(nodeText)
+                    return nodeText
+                }
+
+                // console.log("fired in nodegroup")
+                // self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
+                // var nodes = self.graph.nodes
+                //     .filter(function (node) {
+                //         return node.nodegroup_id === self.selectedNodeGroup();
+                //     })
+                //     .map(function (node) {
+                //         node.id = node.nodeid;
+                //         node.text = node.name;
+                //         return node;
+                //     });
+                // // re-write nodes to only concept type nodes
+                // var nodes = nodes.filter(function (node) {
+                //     return node.datatype === "concept";
+                // });
+                // self.nodes.removeAll();
+                // self.nodes(nodes);
+                // self.rerender(true);
+                // self.nodes().forEach(function (node) { });
+                console.log(ko.mapping.toJS(this))
             },
             template: {
                 require:
@@ -243,5 +268,5 @@ define([
 //                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) ----- COMPLETE:
 //                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
 //                 arches.url is undefined even though I'm importing arches at the top, what do? ------ COMPLETE:
-//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? It's not being called anywhere else FIXME: is selectedVal is not null
+//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? --- COMPLETE: It's not being called anywhere else FIXME: is selectedVal is not null
 //                 Should we ad some functionality to update the rule if they push a rule, and then decided to change the permissions on the same screen  ?
