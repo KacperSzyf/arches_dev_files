@@ -162,23 +162,10 @@ class Tile(models.TileModel):
             edit.transactionid = transaction_id
         edit.save()
         
-        # if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstance.resourceinstanceid).exists():
-        #     LatestResourceEdit.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid).delete()
-            
-            
-            
-        # latest_edit = LatestResourceEdit()
-        # latest_edit.resourceinstanceid = self.resourceinstance.resourceinstanceid
-        # latest_edit.timestamp = timestamp
-        # latest_edit.edittype = edit_type
-        # latest_edit.user_username = getattr(user, "username", "")
-        # latest_edit.resourcedisplayname = Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid).displayname
-        # latest_edit.save()
-        
         if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstance.resourceinstanceid, edittype = 'create').exists():
             if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').exists():
                 LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').delete()
-            #Delete old verions and add latest edit
+            #Delete old versions and add latest edit
             latest_edit = LatestResourceEdit()
             latest_edit.resourceinstanceid = self.resourceinstance.resourceinstanceid
             latest_edit.timestamp = timestamp
