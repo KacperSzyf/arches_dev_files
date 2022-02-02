@@ -250,8 +250,6 @@ class LatestResourceEdit(models.Model):
     timestamp = models.DateTimeField(blank=True, null=True)
     user_username = models.TextField(blank=True, null=True)
     
-    
-
     class Meta:
         managed = True
         db_table = "latest_resource_edit"
