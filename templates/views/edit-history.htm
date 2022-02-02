@@ -6,7 +6,7 @@
 
 
 {% block main_content %}
-
+<h1>FOUR HEAD</h1>
     <div class="pad-all">
         <div class="resource-grid-title">{% trans "Recently Added Resources" %}</div>
         <div class="recent-additions-container">
@@ -23,20 +23,21 @@
                       <th class="min-tablet" style="display:none"></th>
                   </tr>
               </thead>
+              <!-- TODO:Change logic to reflect latest_resource_table edits -->
               <tbody>
-                  {% for edit in recent_edits %}
+                  {% for edit in latest_resource_edit %}
                   <tr>
                     {% if edit.deleted == True %}
                       <td><div>{{edit.resourceinstanceid}}<span>{% trans " (Resource Deleted)" %}</span></div></td>
                     {% else %}
                       <td><a href="{% url 'resource_editor' edit.resourceinstanceid %}" class="regular-link" target="_blank">{{edit.resourceinstanceid}}</a></td>
                     {% endif %}
-                      <td>{{edit.resourcedisplayname}}</td>
-                      <td>{{edit.resource_model_name}}</td>
-                      <td>{{edit.timestamp}}</td>
-                      <td>{{edit.friendly_edittype}}</td>
+                      <td>{{edit.resourcedisplayname}}</td> <!-- Resource Id -->
+                      <td>{{edit.resource_model_name}}</td> <!-- Resource Name -->
+                      <td>{{edit.timestamp}}</td>  <!-- Edited -->
+                      <td>{{edit.friendly_edittype}}</td>  <!-- Edit Tupe -->
                       {% if edit.user_firstname == '' and edit.user_lastname == '' %}
-                        <td>{{edit.user_username}}</td>
+                        <td>{{edit.user_username}}</td>  <!--Editor-->
                       {% else %}
                         <td>{{edit.user_firstname}} {{edit.user_lastname}}</td>
                       {% endif %}
