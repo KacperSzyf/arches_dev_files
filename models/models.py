@@ -241,7 +241,7 @@ class EditLog(models.Model):
         managed = True
         db_table = "edit_log"
 
-#------recently added
+#---------------------------recently added--------------------------
 class LatestResourceEdit(models.Model):
     editlogid = models.UUIDField(primary_key=True, default=uuid.uuid1)
     resourceinstanceid = models.TextField(blank=True, null=True)
@@ -253,7 +253,7 @@ class LatestResourceEdit(models.Model):
     class Meta:
         managed = True
         db_table = "latest_resource_edit"
-#-------------------
+#-------------------------------------------------------------------
 
 
 class MobileSyncLog(models.Model):

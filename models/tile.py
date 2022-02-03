@@ -161,7 +161,7 @@ class Tile(models.TileModel):
         if transaction_id is not None:
             edit.transactionid = transaction_id
         edit.save()
-        
+#------------------------------------------------------------------------------------------------
         if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstance.resourceinstanceid, edittype = 'create').exists():
             if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').exists():
                 LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').delete()
@@ -181,7 +181,7 @@ class Tile(models.TileModel):
             latest_edit.user_username = getattr(user,"username", "")
             latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid).displayname
             latest_edit.save()
-
+#----------------------------------------------------------------------------------------------
     def tile_collects_data(self):
         result = True
         if self.tiles is not None and len(self.tiles) > 0:

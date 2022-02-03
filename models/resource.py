@@ -106,17 +106,6 @@ class Resource(models.ResourceInstance):
         edit.edittype = edit_type
         edit.save()
 #-------------------Recently added
-        #check if any exist with an edit type that is not create 
-        #if one does exist delete it 
-        
-        # if create exists: 
-            # if edit exists:
-                # delete edit
-            # save new latest edit 
-        # else:
-            # save new create
-        
-        
         if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstanceid, edittype = 'create').exists():
             if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').exists():
                 LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').delete()
@@ -137,17 +126,6 @@ class Resource(models.ResourceInstance):
             latest_edit.user_username = getattr(user,"username", "")
             latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstanceid).displayname
             latest_edit.save()
-        
-        # if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstanceid).exists():
-        #     LatestResourceEdit.objects.get(resourceinstanceid=self.resourceinstanceid).delete()
-        # #Delete old verions and add latest edit
-        #     latest_edit = LatestResourceEdit()
-        #     latest_edit.resourceinstanceid = self.resourceinstanceid
-        #     latest_edit.timestamp = timestamp
-        #     latest_edit.user_username = getattr(user, "username", "")
-        #     latest_edit.edittype = edit_type
-        #     latest_edit.save()
-        
 #---------------------------------
     def save(self, *args, **kwargs):
         """
