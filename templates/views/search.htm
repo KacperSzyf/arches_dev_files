@@ -114,23 +114,22 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                     <div class="popup-panel-row" data-bind="foreach: {data: sharedStateObject.filtersList, as: 'filter'}">
                         <!-- ko if: filter.type === 'popup' && filter.enabled -->
                         {% if user_can_read %}
-                        <!-- ko: print(filter)-->
                         <!-- ko if: filter.name === "Saved"-->
                         <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
                             <span>Historic Themes</span>
                         </button>
                         <!-- /ko -->
-                        <!-- ko if: filter.name === "Date"-->
+                        <!-- ko if: filter.name === "Time Filter"-->
                         <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
                             <span>Date Interval</span>
                         </button>
                         <!-- /ko -->
-                        <!-- ko ifnot: filter.name === "Saved"-->
-                        <button class="saved-search-container search-type-btn-popup relative" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
+                        <!-- ko if: filter.name === "Search Export"-->
+                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
-                            <!-- <span data-bind="text: filter.name"></span> -->
+                            <span>Download Results</span>
                         </button>
                         <!-- /ko -->
                         {% endif %}
