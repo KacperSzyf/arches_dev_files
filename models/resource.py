@@ -93,7 +93,7 @@ class Resource(models.ResourceInstance):
     def save_edit(self, user={}, note="", edit_type="", transaction_id=None):
         timestamp = datetime.datetime.now()
         edit = EditLog()
-        edit.resourceclassid = self.graph_id
+        edit.py = self.graph_id
         edit.resourceinstanceid = self.resourceinstanceid
         edit.userid = getattr(user, "id", "")
         edit.user_email = getattr(user, "email", "")
