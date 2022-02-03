@@ -24,8 +24,8 @@
               </thead>
               <!-- TODO:Change logic to reflect latest_resource_table edits -->
               <tbody>
-                  {% for edit in latest_resource_edit %}
-                  <tr>
+                  {% for edit in recent_edits %}
+                    <tr>
                     {% if edit.deleted == True %}
                       <td><div>{{edit.resourceinstanceid}}<span>{% trans " (Resource Deleted)" %}</span></div></td>
                     {% else %}
@@ -35,11 +35,7 @@
                       <td>{{edit.resource_model_name}}</td> <!-- Resource Name -->
                       <td>{{edit.timestamp}}</td>  <!-- Edited -->
                       <td>{{edit.friendly_edittype}}</td>  <!-- Edit Tupe -->
-                      {% if edit.user_firstname == '' and edit.user_lastname == '' %}
-                        <td>{{edit.user_username}}</td>  <!--Editor-->
-                      {% else %}
-                        <td>{{edit.user_firstname}} {{edit.user_lastname}}</td>
-                      {% endif %}
+                      <td>{{edit.username}}</td>  <!--Editor-->
                       <td>
                         {% if edit.deleted == True %}
                           <a href="" class="btn btn-primary" disabled>{% trans "View Report" %}</a>

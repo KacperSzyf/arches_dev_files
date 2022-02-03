@@ -23,7 +23,7 @@
                   </tr>
               </thead>
               <tbody>
-                  {% for edit in latest_resource_edit %}
+                  {% for edit in recent_edits %}
                   <tr>
                     {% if edit.deleted == True %}
                       <td><div>{{edit.resourceinstanceid}}<span>{% trans " (Resource Deleted)" %}</span></div></td>

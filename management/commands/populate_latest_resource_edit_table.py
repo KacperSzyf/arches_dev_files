@@ -1,13 +1,19 @@
+
+#Core arches imports
+from arches.app.models.system_settings import settings
 from arches.app.models.models import EditLog, LatestResourceEdit, ResourceInstance
+
+#Django imports
 from django.core.management.base import BaseCommand, CommandError
+
 
 class Command(BaseCommand):
     """
     Commands for managing datatypes
     """
     def handle(self, *args, **options):
-        #Pull all edit logs and order time decending by time
-        edits = EditLog.objects.order_by('resourceinstanceid', '-timestamp').distinct('resourceinstanceid')
+        #Pull all edit logs and order time decending by time and exclude system setting changes
+        edits = EditLog.objects.order_by('resourceinstanceid', '-timestamp').distinct('resourceinstanceid').exclude(resourceclassid=settings.SYSTEM_SETTINGS_RESOURCE_MODEL_ID)
         
         for edit in edits:
             #Check if edit still exists within the resource
