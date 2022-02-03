@@ -25,7 +25,7 @@
               </thead>
               <!-- TODO:Change logic to reflect latest_resource_table edits -->
               <tbody>
-                  {% for edit in recent_edits %}
+                  {% for edit in latest_resource_edit %}
                   <tr>
                     {% if edit.deleted == True %}
                       <td><div>{{edit.resourceinstanceid}}<span>{% trans " (Resource Deleted)" %}</span></div></td>
