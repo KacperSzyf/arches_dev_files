@@ -93,7 +93,7 @@ class Resource(models.ResourceInstance):
     def save_edit(self, user={}, note="", edit_type="", transaction_id=None):
         timestamp = datetime.datetime.now()
         edit = EditLog()
-        edit.py = self.graph_id
+        edit.resourceclassid = self.graph_id
         edit.resourceinstanceid = self.resourceinstanceid
         edit.userid = getattr(user, "id", "")
         edit.user_email = getattr(user, "email", "")
@@ -105,7 +105,7 @@ class Resource(models.ResourceInstance):
             edit.transactionid = transaction_id
         edit.edittype = edit_type
         edit.save()
-#-------------------Recently added
+        
         if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstanceid, edittype = 'create').exists():
             if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').exists():
                 LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').delete()
@@ -126,7 +126,7 @@ class Resource(models.ResourceInstance):
             latest_edit.user_username = getattr(user,"username", "")
             latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstanceid).displayname
             latest_edit.save()
-#---------------------------------
+
     def save(self, *args, **kwargs):
         """
         Saves and indexes a single resource

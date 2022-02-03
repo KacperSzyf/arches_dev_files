@@ -161,27 +161,28 @@ class Tile(models.TileModel):
         if transaction_id is not None:
             edit.transactionid = transaction_id
         edit.save()
-#------------------------------------------------------------------------------------------------
-        if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstance.resourceinstanceid, edittype = 'create').exists():
-            if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').exists():
-                LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstance.resourceinstanceid).exclude(edittype = 'create').delete()
-            #Delete old versions and add latest edit
-            latest_edit = LatestResourceEdit()
-            latest_edit.resourceinstanceid = self.resourceinstance.resourceinstanceid
-            latest_edit.timestamp = timestamp
-            latest_edit.user_username = getattr(user, "username", "")
-            latest_edit.edittype = edit_type
-            latest_edit.save()
+        
+        if LatestResourceEdit.objects.filter(resourceinstanceid=self.resourceinstanceid, edittype = 'create').exists():
+                if LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').exists():
+                    LatestResourceEdit.objects.filter(resourceinstanceid = self.resourceinstanceid).exclude(edittype = 'create').delete()
+                #Delete old verions and add latest edit
+                latest_edit = LatestResourceEdit()
+                latest_edit.resourceinstanceid = self.resourceinstanceid
+                latest_edit.timestamp = timestamp
+                latest_edit.user_username = getattr(user, "username", "")
+                latest_edit.edittype = edit_type
+                latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstanceid).displayname
+                latest_edit.save()
 
         else:
             latest_edit = LatestResourceEdit()
-            latest_edit.resourceinstanceid = self.resourceinstance.resourceinstanceid
+            latest_edit.resourceinstanceid = self.resourceinstanceid
             latest_edit.timestamp = timestamp
             latest_edit.edittype = edit_type
             latest_edit.user_username = getattr(user,"username", "")
-            latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstance.resourceinstanceid).displayname
+            latest_edit.resourcedisplayname =  Resource.objects.get(resourceinstanceid=self.resourceinstanceid).displayname
             latest_edit.save()
-#----------------------------------------------------------------------------------------------
+                
     def tile_collects_data(self):
         result = True
         if self.tiles is not None and len(self.tiles) > 0:
@@ -599,16 +600,13 @@ class Tile(models.TileModel):
 
     @staticmethod
     def get_blank_tile(nodeid, resourceid=None):
-        parent_nodegroup = None
-        node = models.Node.objects.get(pk=nodeid)
-        if node.nodegroup.parentnodegroup_id is not None:
-            parent_nodegroup = node.nodegroup.parentnodegroup
-            parent_tile = Tile.get_blank_tile_from_nodegroup_id(
-                nodegroup_id=node.nodegroup.parentnodegroup_id, resourceid=resourceid, parenttile=None
-            )
+        node = models.Node.objects.filter(pk=nodeid).select_related("nodegroup")[0]
+        parentnodegroup_id = node.nodegroup.parentnodegroup_id
+        if parentnodegroup_id is not None:
+            parent_tile = Tile.get_blank_tile_from_nodegroup_id(nodegroup_id=parentnodegroup_id, resourceid=resourceid, parenttile=None)
             parent_tile.tileid = None
             parent_tile.tiles = []
-            for nodegroup in models.NodeGroup.objects.filter(parentnodegroup_id=node.nodegroup.parentnodegroup_id):
+            for nodegroup in models.NodeGroup.objects.filter(parentnodegroup_id=parentnodegroup_id):
                 parent_tile.tiles.append(Tile.get_blank_tile_from_nodegroup_id(nodegroup.pk, resourceid=resourceid, parenttile=parent_tile))
             return parent_tile
         else:
