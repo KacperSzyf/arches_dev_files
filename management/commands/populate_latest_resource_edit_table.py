@@ -21,6 +21,8 @@ class Command(BaseCommand):
                     #And replace it with the most recent edit even
                     latest_edit = LatestResourceEdit()
                     latest_edit.resourceinstanceid = edit.resourceinstanceid
+                    latest_edit.username = edit.user_username
+                    latest_edit.resourcedisplayname = edit.resourcedisplayname
                     latest_edit.timestamp = edit.timestamp
                     latest_edit.edittype = edit.edittype
                     latest_edit.save()
@@ -28,6 +30,8 @@ class Command(BaseCommand):
                 else:
                     latest_edit = LatestResourceEdit()
                     latest_edit.resourceinstanceid = edit.resourceinstanceid
+                    latest_edit.username = edit.user_username
+                    latest_edit.resourcedisplayname = edit.resourcedisplayname
                     latest_edit.timestamp = edit.timestamp
                     latest_edit.edittype = edit.edittype
                     latest_edit.save()
