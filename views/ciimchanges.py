@@ -1,5 +1,5 @@
 #Imports
-from functools import wraps
+from functools import total_ordering, wraps
 import math
 from datetime import datetime
 from time import perf_counter, time
@@ -53,13 +53,31 @@ class ChangesView(View):
             #Get all edits within time range and exclude system settings changes
             edits_queryset = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp').exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
 
-            total_resources = len(edits_queryset)
+            #get the length of unique resourceinstanceid in edits queryset, flat=True prevents the list from being returned at one-tuple
+            total_resources = len(list(set(edits_queryset.values_list('resourceinstanceid', flat=True))))
+
             #Paginate results
             no_pages = math.ceil(total_resources/per_page)
             edits = edits_queryset[(page-1)*per_page:page*per_page]
 
             return (edits, total_resources, no_pages, edits_queryset)
        
+           
+        # def temp_name():
+       
+#        "metadata": {
+# "from": "2022-01-01T06:21:05",
+# "to": "2022-02-05T03:37:39",
+# "totalNumberOfResources": 3096,
+# "perPage": 100,
+# "page": 1,
+# "numberOfPages": 31,
+# "timeElapsed": {
+# "total": 1.2531540393829346,
+# "dbQuery": 0.022358179092407227,
+# "dataDownload": 1.2307958602905273
+# }
+# },
         @timer
         def download_data(edits, edits_queryset):
             '''
@@ -68,12 +86,12 @@ class ChangesView(View):
             :tuple: Returns all json data in a d tuple 
             '''
             data = []
-    
-            count = 0
+            resource_data = Resource.objects.all()
+
             for edit in edits:
                 resourceid=edit.resourceinstanceid
-                if Resource.objects.filter(pk=resourceid).exists():
-                    resource = Resource.objects.get(pk=resourceid)
+                if resource_data.filter(pk=resourceid).exists():
+                    resource = resource_data.get(pk=resourceid)
                     resource.load_tiles()
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
                         #Check if the tile has a creation even and an edit even
