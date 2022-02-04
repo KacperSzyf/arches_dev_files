@@ -5,13 +5,17 @@ from datetime import datetime
 from time import time
 
 from django.views.generic import View
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from arches.app.models.system_settings import settings
 from arches.app.utils.betterJSONSerializer import JSONSerializer
 
 from arches.app.models.resource import Resource
 from arches.app.models.models import LatestResourceEdit
+
+from arches.app.models.models import Concept as modelConcept
+from arches.app.models.concept import Concept
+from arches.app.utils.skos import SKOSWriter, SKOSReader
 
 #Decorators
 def timer(func):
@@ -48,41 +52,43 @@ class ChangesView(View):
             #Get all edits within time range
             edits = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp')
 
-            #Get all resrouce id's in edits
-            resource_ids = [edit.resourceinstanceid for edit in edits]
-            total_resources = len(resource_ids)
+            #Remove settings changes
+            if settings.SYSTEM_SETTINGS_RESOURCE_ID in [edit.resourceinstanceid for edit in edits]:
+                edits = edits.exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
+
+            total_resources = len(edits)
             #Paginate results
             no_pages = math.ceil(total_resources/per_page)
-            resourceinstanceids = resource_ids[(page-1)*per_page:page*per_page]
+            edits = edits[(page-1)*per_page:page*per_page]
 
-            return (resourceinstanceids, total_resources, no_pages)
+            return (edits, total_resources, no_pages)
        
         @timer
-        def download_data(resourceinstanceids):
+        def download_data(edits):
             '''
             Get all data as json
             Returns:
             :tuple: Returns all json data in a d tuple 
             '''
-            #Remove settings changes
-            if settings.SYSTEM_SETTINGS_RESOURCE_ID in resourceinstanceids:
-                resourceinstanceids.remove(settings.SYSTEM_SETTINGS_RESOURCE_ID)
 
             data = []
             
-            for resourceid in resourceinstanceids:
+            for edit in edits:
+                resourceid=edit.resourceinstanceid
                 if Resource.objects.filter(pk=resourceid).exists():
                     resource = Resource.objects.get(pk=resourceid)
                     resource.load_tiles()
 
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
-                        resource_json = JSONSerializer().serializeToPython(resource)
+                        resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                        resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        resource_json.update(JSONSerializer().serializeToPython(resource))
                         if resource_json['displaydescription'] == '<Description>': resource_json['displaydescription'] = None
                         if resource_json['map_popup'] == '<Name_Type>': resource_json['map_popup'] = None
                         if resource_json['displayname'] == '<NMRW_Name>' : resource_json['displayname'] = None
                         data.append(resource_json)
                 else:
-                    data.append({'resourceinstance_id':resourceid, 'tiles':None})
+                    data.append({'modified':edit.timestamp,'resourceinstance_id':resourceid, 'tiles':None})
 
 
             return (data,)      
@@ -125,5 +131,20 @@ class ChangesView(View):
 
         response = {'metadata': metadata, 'results':json_data[0]}
 
-
         return JsonResponse(response, json_dumps_params={'indent': 2})
+
+# download and append all xml thesauri
+class ConceptsExportView(View):
+    def get(self, request):
+        conceptids = [str(c.conceptid) for c in modelConcept.objects.filter(nodetype='ConceptScheme')]
+        concept_graphs = []
+        for conceptid in conceptids:
+            print(conceptid)
+            concept_graphs.append(Concept().get(
+                id=conceptid,
+                include_subconcepts=True,
+                include_parentconcepts=False,
+                include_relatedconcepts=True,
+                depth_limit=None,
+                up_depth_limit=None))
+        return HttpResponse(SKOSWriter().write(concept_graphs, format="pretty-xml"), content_type="application/xml")
