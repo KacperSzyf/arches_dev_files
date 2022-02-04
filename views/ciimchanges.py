@@ -76,24 +76,31 @@ class ChangesView(View):
                     resource = Resource.objects.get(pk=resourceid)
                     resource.load_tiles()
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
-                        #Check if the edit source is not of type 'create'
-                        if edit.edittype != 'create':
-                            #If not add the currents edits time stamp to modified
-                            resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
-                            #and fetch the log of when the record was created
-                            create_event = edits_queryset.get(resourceinstanceid = resourceid, edittype = 'create')
-                            #append the the created time to log
-                            resource_json['created'] = create_event.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        #Check if the tile has a creation even and an edit even
+                        if edits_queryset.filter(resourceinstanceid = resourceid).count() > 1:
+                            #Check if the edit source is not of type 'create' ie.  modification / update
+                            if edit.edittype != 'create':
+                                #If not add the currents edits time stamp to modified
+                                resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                                #and fetch the log of when the record was created
+                                create_event = edits_queryset.get(resourceinstanceid = resourceid, edittype = 'create')
+                                #append the the created time to log
+                                resource_json['created'] = create_event.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                                resource_json.update(JSONSerializer().serializeToPython(resource))
+                                if resource_json['displaydescription'] == '<Description>': resource_json['displaydescription'] = None
+                                if resource_json['map_popup'] == '<Name_Type>': resource_json['map_popup'] = None
+                                if resource_json['displayname'] == '<NMRW_Name>' : resource_json['displayname'] = None
+                                data.append(resource_json)
+                        #Just a creation type event
                         else:
-                            #if it is of type create set modified and created to the same value
-                            resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                            resource_json = {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
                             resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
-
-                        resource_json.update(JSONSerializer().serializeToPython(resource))
-                        if resource_json['displaydescription'] == '<Description>': resource_json['displaydescription'] = None
-                        if resource_json['map_popup'] == '<Name_Type>': resource_json['map_popup'] = None
-                        if resource_json['displayname'] == '<NMRW_Name>' : resource_json['displayname'] = None
-                        data.append(resource_json)
+                            resource_json.update(JSONSerializer().serializeToPython(resource))
+                            if resource_json['displaydescription'] == '<Description>': resource_json['displaydescription'] = None
+                            if resource_json['map_popup'] == '<Name_Type>': resource_json['map_popup'] = None
+                            if resource_json['displayname'] == '<NMRW_Name>' : resource_json['displayname'] = None
+                            data.append(resource_json)
+                #Resource with no tiles
                 else:
                     data.append({'modified':edit.timestamp,'resourceinstance_id':resourceid, 'tiles':None})
 
