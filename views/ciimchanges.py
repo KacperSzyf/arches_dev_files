@@ -1,17 +1,3 @@
-# perfomnace
-#   "metadata": {
-#     "from": "2022-01-01T06:21:05",
-#     "to": "2022-02-04T03:37:39",
-#     "totalNumberOfResources": 3097,
-#     "perPage": 100,
-#     "page": 1,
-#     "numberOfPages": 31,
-#     "timeElapsed": {
-#       "total": 1.0538086891174316,
-#       "dbQuery": 0.02367377281188965,
-#       "dataDownload": 1.030134916305542
-#     
-
 #Imports
 from functools import wraps
 import math
@@ -64,7 +50,7 @@ class ChangesView(View):
             Returns:
             :tuple: Where [0] contains all ID's, [1] total of all ID's, [2] number of pages
             '''
-            #Get all edits within time range
+            #Get all edits within time range and exclude system settings changes
             edits_queryset = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp').exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
 
             total_resources = len(edits_queryset)
@@ -81,32 +67,25 @@ class ChangesView(View):
             Returns:
             :tuple: Returns all json data in a d tuple 
             '''
-
             data = []
-            
-            #check if resource type is not 'create' 
-            #follow the usual logic
-            #query existing set to see if there is a create version of the tileset
-            #if so add the time stamp to existing set 
-            
+    
             count = 0
             for edit in edits:
                 resourceid=edit.resourceinstanceid
                 if Resource.objects.filter(pk=resourceid).exists():
                     resource = Resource.objects.get(pk=resourceid)
                     resource.load_tiles()
-                    #TODO: Get date created in as well as modified 
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
-                        # if edits_queryset.filter(resourceinstanceid = resourceid).exclude(edittype = "create").exists():     
-                        #     created_event = edits_queryset.filter(resourceinstanceid = resourceid, edittype="create")
-                        #     resource_json['created'] = created_event[-1].timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
-                        # else:
-                        #     resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        #Check if the edit source is not of type 'create'
                         if edit.edittype != 'create':
+                            #If not add the currents edits time stamp to modified
                             resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                            #and fetch the log of when the record was created
                             create_event = edits_queryset.get(resourceinstanceid = resourceid, edittype = 'create')
+                            #append the the created time to log
                             resource_json['created'] = create_event.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
                         else:
+                            #if it is of type create set modified and created to the same value
                             resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
                             resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
 
