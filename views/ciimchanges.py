@@ -50,11 +50,7 @@ class ChangesView(View):
             :tuple: Where [0] contains all ID's, [1] total of all ID's, [2] number of pages
             '''
             #Get all edits within time range
-            edits = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp')
-
-            #Remove settings changes
-            if settings.SYSTEM_SETTINGS_RESOURCE_ID in [edit.resourceinstanceid for edit in edits]:
-                edits = edits.exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
+            edits = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp').exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
 
             total_resources = len(edits)
             #Paginate results
@@ -78,7 +74,7 @@ class ChangesView(View):
                 if Resource.objects.filter(pk=resourceid).exists():
                     resource = Resource.objects.get(pk=resourceid)
                     resource.load_tiles()
-
+                    #TODO: Get date created in as well as modified 
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
                         resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
                         resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
