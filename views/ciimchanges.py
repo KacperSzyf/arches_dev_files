@@ -1,8 +1,23 @@
+# perfomnace
+#   "metadata": {
+#     "from": "2022-01-01T06:21:05",
+#     "to": "2022-02-04T03:37:39",
+#     "totalNumberOfResources": 3097,
+#     "perPage": 100,
+#     "page": 1,
+#     "numberOfPages": 31,
+#     "timeElapsed": {
+#       "total": 1.0538086891174316,
+#       "dbQuery": 0.02367377281188965,
+#       "dataDownload": 1.030134916305542
+#     
+
 #Imports
 from functools import wraps
 import math
 from datetime import datetime
-from time import time
+from time import perf_counter, time
+from venv import create
 
 from django.views.generic import View
 from django.http import JsonResponse, HttpResponse
@@ -50,17 +65,17 @@ class ChangesView(View):
             :tuple: Where [0] contains all ID's, [1] total of all ID's, [2] number of pages
             '''
             #Get all edits within time range
-            edits = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp').exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
+            edits_queryset = LatestResourceEdit.objects.filter(timestamp__range=(from_date, to_date)).order_by('timestamp').exclude(resourceinstanceid=settings.SYSTEM_SETTINGS_RESOURCE_ID)
 
-            total_resources = len(edits)
+            total_resources = len(edits_queryset)
             #Paginate results
             no_pages = math.ceil(total_resources/per_page)
-            edits = edits[(page-1)*per_page:page*per_page]
+            edits = edits_queryset[(page-1)*per_page:page*per_page]
 
-            return (edits, total_resources, no_pages)
+            return (edits, total_resources, no_pages, edits_queryset)
        
         @timer
-        def download_data(edits):
+        def download_data(edits, edits_queryset):
             '''
             Get all data as json
             Returns:
@@ -69,6 +84,12 @@ class ChangesView(View):
 
             data = []
             
+            #check if resource type is not 'create' 
+            #follow the usual logic
+            #query existing set to see if there is a create version of the tileset
+            #if so add the time stamp to existing set 
+            
+            count = 0
             for edit in edits:
                 resourceid=edit.resourceinstanceid
                 if Resource.objects.filter(pk=resourceid).exists():
@@ -76,8 +97,19 @@ class ChangesView(View):
                     resource.load_tiles()
                     #TODO: Get date created in as well as modified 
                     if not(len(resource.tiles) == 1 and not resource.tiles[0].data):
-                        resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
-                        resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        # if edits_queryset.filter(resourceinstanceid = resourceid).exclude(edittype = "create").exists():     
+                        #     created_event = edits_queryset.filter(resourceinstanceid = resourceid, edittype="create")
+                        #     resource_json['created'] = created_event[-1].timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        # else:
+                        #     resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        if edit.edittype != 'create':
+                            resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                            create_event = edits_queryset.get(resourceinstanceid = resourceid, edittype = 'create')
+                            resource_json['created'] = create_event.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+                        else:
+                            resource_json= {'modified':edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')}
+                            resource_json['created'] = edit.timestamp.strftime('%d-%m-%YT%H:%M:%SZ')
+
                         resource_json.update(JSONSerializer().serializeToPython(resource))
                         if resource_json['displaydescription'] == '<Description>': resource_json['displaydescription'] = None
                         if resource_json['map_popup'] == '<Name_Type>': resource_json['map_popup'] = None
@@ -101,9 +133,10 @@ class ChangesView(View):
         page = int(request.GET.get('page'))
 
         #Data
+        #db_data[x] =     0         1               2           3
+        #               edits, total_resources, no_pages, edits_queryset
         db_data = get_data(from_date, to_date, per_page, page)
-
-        json_data = download_data(db_data[0])
+        json_data = download_data(db_data[0], db_data[3])
 
         end_time = time()
         
