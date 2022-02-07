@@ -26,7 +26,6 @@ define([
     //Methods
     const ruleExists = function (existingRules, newRule) {
         for (let i = 0; i < existingRules().length; i++) {
-            console.log(ko.mapping.toJS(existingRules()[i]))
             if (existingRules()[i].selectedNodeGroup() == newRule.selectedNodeGroup()
                 && existingRules()[i].selectedNode() == newRule.selectedNode()
                 && existingRules()[i].selectedVal() == newRule.selectedVal())
@@ -102,7 +101,6 @@ define([
 
                 // This generates the list of nodes once nodegroup is selected
                 this.selectedNodeGroup.subscribe(function () {
-                    console.log("fired in nodegroup")
                     self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
                     var nodes = self.graph.nodes
                         .filter(function (node) {
@@ -138,7 +136,6 @@ define([
                                     (identity) => ko.unwrap(identity["identityName"]) === v.name
                                 ) === false
                         ) {
-                            console.log("adding", v.name);
                             var groupEntry = {
                                 identityName: ko.unwrap(v.name),
                                 identityId: ko.unwrap(v.id),
@@ -152,7 +149,6 @@ define([
 
                 // Return concept list
                 this.selectedNode.subscribe(function (val) {
-                    console.log("val", val)
                     var concept_node = self.graph.nodes.find(function (node) {
                         return node.nodeid === val;
                     });
@@ -166,7 +162,6 @@ define([
                     if (self.rules().length > 0) {
                         let existingRule = matchRule(self.rules, self.selectedNode, self.selectedNodeGroup, self.selectedVal)
                         if (existingRule) {
-                            console.log("fired!")
                             self.editRule(existingRule)
 
                         }
@@ -177,22 +172,22 @@ define([
 
                 //methods
                 this.addRule = function () {
-                    console.log("clicked!");
-                    //console.log("rule", ko.mapping.toJS(this.selectedNodeGroup), ko.mapping.toJS(this.selectedNode), ko.mapping.toJS(this.selectedVal), ko.mapping.toJS(this.userGroups))
-                    let newRule = new Rule(
+                        let newRule = new Rule(
                         this.selectedNodeGroup,
                         this.selectedNode,
                         this.selectedVal,
                         this.userGroups
                     );
-                    console.log(newRule);
+                    if((newRule.selectedNodeGroup() == null
+                    || newRule.selectedNode() == null
+                    || newRule.selectedVal() == null)) alert("Can't add empty rule!")
+                    else
                     if (ruleExists(self.rules, newRule)) alert("Rule already exists!");
                     else self.rules.push(newRule);
                 };
                 //COMPLETE:
 
                 this.removeRule = function () {
-                    console.log("removing this:", ko.mapping.toJS(this));
                     self.rules.remove(this);
                 };//COMPLETE:
 
@@ -200,7 +195,7 @@ define([
                     self.selectedNode(rule.selectedNode())
                     self.selectedNodeGroup(rule.selectedNodeGroup())
                     self.userGroups(rule.userGroups())
-                    console.log("this", ko.mapping.toJS(self))
+                    if(self.selectedVal() == null) self.selectedVal(rule.selectedVal())
                     self.rules.remove(rule)
                 }// COMPLETE::
 
@@ -213,7 +208,6 @@ define([
                             async: false
                         }
                     ).done(function (data) {
-                        console.log(data.value);
                         conceptName = data.value
                     });
                     return conceptName
@@ -222,38 +216,14 @@ define([
                 this.getNodeText = function (uuid) {
                     const nodeText = self.graph.nodes.filter(function (node) {
                         node.nodegroup_id = uuid;
-                        console.log(node)
                         return node
                     }).map(function (node) {
                         node.id = node.nodeid;
                         node.text = node.name;
-                        console.log(node.name)
                         return node.text;
                     });
-                    console.log(nodeText)
                     return nodeText
                 }
-
-                // console.log("fired in nodegroup")
-                // self.rerender(false); //Toggling rerender forces the node options to load in the select2 dropdown when the card changes
-                // var nodes = self.graph.nodes
-                //     .filter(function (node) {
-                //         return node.nodegroup_id === self.selectedNodeGroup();
-                //     })
-                //     .map(function (node) {
-                //         node.id = node.nodeid;
-                //         node.text = node.name;
-                //         return node;
-                //     });
-                // // re-write nodes to only concept type nodes
-                // var nodes = nodes.filter(function (node) {
-                //     return node.datatype === "concept";
-                // });
-                // self.nodes.removeAll();
-                // self.nodes(nodes);
-                // self.rerender(true);
-                // self.nodes().forEach(function (node) { });
-                console.log(ko.mapping.toJS(this))
             },
             template: {
                 require:
