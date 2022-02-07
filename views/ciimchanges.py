@@ -78,6 +78,8 @@ class ChangesView(View):
 # "dataDownload": 1.2307958602905273
 # }
 # },
+
+#TODO: Break down into functions
         @timer
         def download_data(edits, edits_queryset):
             '''

@@ -53,9 +53,7 @@ class EamenaPermissions(BaseFunction):
         raise NotImplementedError
 
     def save(self, tile, request):
-        print("!!! Calling EamenaPermissions function save...")
-        print("Remember there is just a return statment here!!!!!!!!!!!!!!!!!!!!!!")
-        
+        print("!!! Calling EamenaPermissions function save...")        
         data = tile.data
         node = self.config['selected_node']
         value = self.config['selected_val']
