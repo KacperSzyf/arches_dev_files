@@ -80,7 +80,7 @@ define([
                 // Requires push method when we get to multiple rules
                 this.selectedNodeGroup.subscribe(function (val) {
                     self.triggering_nodegroups([val]);
-                });
+                }); //COMPLETE:
 
                 // Generates the list of nodegroups/cards to be used in the drop down
                 this.graph.cards.forEach(function (card) {
@@ -118,7 +118,7 @@ define([
                     self.nodes.removeAll();
                     self.nodes(nodes);
                     self.rerender(true);
-                    self.nodes().forEach(function (node) { });
+                    // self.nodes().forEach(function (node) { });
                 }); //COMPLETE:
 
                 // Compare initialUsers to userGroups
@@ -215,8 +215,7 @@ define([
 
                 this.getNodeText = function (uuid) {
                     const nodeText = self.graph.nodes.filter(function (node) {
-                        node.nodegroup_id = uuid;
-                        return node
+                        return node.nodegroup_id === uuid
                     }).map(function (node) {
                         node.id = node.nodeid;
                         node.text = node.name;
