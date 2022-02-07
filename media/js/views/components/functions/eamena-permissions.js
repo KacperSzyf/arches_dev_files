@@ -118,7 +118,6 @@ define([
                     self.nodes.removeAll();
                     self.nodes(nodes);
                     self.rerender(true);
-                    // self.nodes().forEach(function (node) { });
                 }); //COMPLETE:
 
                 // Compare initialUsers to userGroups
@@ -222,7 +221,7 @@ define([
                         return node.text;
                     });
                     return nodeText
-                }
+                }//COMPLETE:
             },
             template: {
                 require:
