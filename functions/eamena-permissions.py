@@ -53,57 +53,59 @@ class EamenaPermissions(BaseFunction):
         raise NotImplementedError
 
     def save(self, tile, request):
-        print("!!! Calling EamenaPermissions function save...")        
         data = tile.data
-        node = self.config['selected_node']
-        value = self.config['selected_val']
-        identities = self.config['user_groups']
-        print(identities)
+        rules = self.config['rules']
+        # node = self.config['selected_node']
+        # value = self.config['selected_val']
+        # identities = self.config['user_groups']
+        print(vars(tile))
+        
+        if len(rules) > 0:
+            for rule in rules:
+                # Check if tile.data has selectedNode and selectedVal
+                print(rules)
+                print(data)
+                if data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
 
-        print(tile._getFunctionClassInstances())
+                    # Get the resource that is currently being saved
+                    resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
+                    print(vars(resource_instance))
+                    resource = Resource.objects.get(pk=tile.resourceinstance_id)
+                    print(vars(resource))
 
-        # if tile.data has the config selected node and selected value 
-        if data[node] and data[node] in value:
+                    # Get a dictionary of users id's with ANY restrictions on the resource
+                    current_perms = get_restricted_users(resource)
+   
+                    # Get a dictionary of users with 'no_access' restriction on the current resource
+                    current_restricted_users = {User.objects.get(pk=userid) for userid in current_perms['no_access']}
+                    
+                    # Check who should not have access to current resource based on the current rule
+                    new_restricted_users = {User.objects.get(pk=_user['identityId']) for _user in rule['userGroups'] if _user['identityType'] == 'user' and not _user['identityVal']}
+                  
+                    users_to_allow = list(current_restricted_users - new_restricted_users)
+                    users_to_restrict = list(new_restricted_users - current_restricted_users)
 
-            # grab resource object and see current permissions
-            resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
-            resource = Resource.objects.get(pk=tile.resourceinstance_id)
+                    print(current_restricted_users)
+                    print({'to allow': users_to_allow , 'to restrict': users_to_restrict})
+            
+                    # print("to restrict", users_to_restrict)
+                    for identityModel in (users_to_restrict):# + groups_to_restrict):
+                        print("identtity model", identityModel)
+                        # first remove all the current permissions
+                        for perm in get_perms(identityModel, resource_instance):
+                            remove_perm(perm, identityModel, resource_instance)
 
-            current_perms = get_restricted_users(resource)
-            current_restricted_users = {User.objects.get(pk=userid) for userid in current_perms['no_access']}
+                        assign_perm("no_access_to_resourceinstance", identityModel, resource_instance)
 
-            # Find a way to get current restricted groups
-            #current_restricted_groups = get_groups_for_object('no_access_to_resourceinstance', resource_instance)
-            #print(set(current_restricted_groups))
+                    for identityModel in (users_to_allow): # + groups_to_allow
+                        print("identtity model", identityModel)
+                        # first remove all the current permissions
+                        for perm in get_perms(identityModel, resource_instance):
+                            remove_perm(perm, identityModel, resource_instance)
 
-            # look in config user groups and list who has access = false
-            new_restricted_users = {User.objects.get(pk=_user['identityId']) for _user in identities if _user['identityType'] == 'user' and not _user['identityVal']}
-            #new_restricted_groups = {Group.objects.get(pk=_group['identityId']) for _group in identities if _group['identityType'] == 'group' and not _group['identityVal']}
-
-            users_to_allow = list(current_restricted_users - new_restricted_users)
-            users_to_restrict = list(new_restricted_users - current_restricted_users)
-            #groups_to_allow = list(set(current_restricted_groups) - new_restricted_groups)
-            #groups_to_restrict = list(new_restricted_groups - set(current_restricted_groups))
-
-            #print({'to allow': users_to_allow + groups_to_allow, 'to restrict': users_to_restrict + groups_to_restrict})
-      
-            for identityModel in (users_to_restrict):# + groups_to_restrict):
-                print(identityModel)
-                # first remove all the current permissions
-                for perm in get_perms(identityModel, resource_instance):
-                    remove_perm(perm, identityModel, resource_instance)
-
-                assign_perm("no_access_to_resourceinstance", identityModel, resource_instance)
-
-            for identityModel in (users_to_allow + groups_to_allow):
-                print(identityModel)
-                # first remove all the current permissions
-                for perm in get_perms(identityModel, resource_instance):
-                    remove_perm(perm, identityModel, resource_instance)
-
-            resource = Resource(str(resource_instance.resourceinstanceid))
-            # resource.graph_id = resource_instance.graph_id
-            resource.index()
+                    resource = Resource(str(resource_instance.resourceinstanceid))
+                    # resource.graph_id = resource_instance.graph_id
+                    resource.index()
 
 
 # write test, verify that the resource instance permissions are as expected. 
