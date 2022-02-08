@@ -58,14 +58,14 @@ class EamenaPermissions(BaseFunction):
         # node = self.config['selected_node']
         # value = self.config['selected_val']
         # identities = self.config['user_groups']
-        print(vars(tile))
+
         
         if len(rules) > 0:
             for rule in rules:
                 # Check if tile.data has selectedNode and selectedVal
-                print(rules)
-                print(data)
-                if data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
+                print({"rule": rule,
+                       "data": data})
+                if rule['selectedNode'] in data.keys() and data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
 
                     # Get the resource that is currently being saved
                     resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
