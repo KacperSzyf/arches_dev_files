@@ -65,7 +65,7 @@ class EamenaPermissions(BaseFunction):
                 # Check if tile.data has selectedNode and selectedVal
                 print({"rule": rule,
                        "data": data})
-                if rule['selectedNode'] in data.keys() and data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
+                if  data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
 
                     # Get the resource that is currently being saved
                     resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
@@ -97,14 +97,13 @@ class EamenaPermissions(BaseFunction):
 
                         assign_perm("no_access_to_resourceinstance", identityModel, resource_instance)
 
-                    for identityModel in (users_to_allow): # + groups_to_allow
+                    for identityModel in (users_to_allow): 
                         print("identtity model", identityModel)
                         # first remove all the current permissions
                         for perm in get_perms(identityModel, resource_instance):
                             remove_perm(perm, identityModel, resource_instance)
 
                     resource = Resource(str(resource_instance.resourceinstanceid))
-                    # resource.graph_id = resource_instance.graph_id
                     resource.index()
 
 

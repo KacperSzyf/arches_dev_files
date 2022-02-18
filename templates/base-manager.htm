@@ -410,7 +410,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                                         </li>
                                         {% endif %}
 
-                                        <!-- Recently Added -->
+                                        <!-- Recently Added
                                         {% if user_can_edit %}
                                         <li{% if 'edit-history' in main_script %} class="active-sub"{% endif %} style="visibility:hidden;">
                                             <a href="{% url 'edit_history' %}" data-bind="click: navigate.bind(this, '{% url 'edit_history' %}') ">
@@ -420,7 +420,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                                                 </span>
                                             </a>
                                         </li>
-                                        {% endif %}
+                                        {% endif %} -->
 
                                         {% for p in plugins %}
                                             {% if p.config is not None %}
