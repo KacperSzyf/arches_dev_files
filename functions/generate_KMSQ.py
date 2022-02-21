@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from importlib import resources
 from platform import node
 from site import execsitecustomize
@@ -9,8 +9,11 @@ from arches.app.models.concept import Concept
 from arches.app.models.tile import Tile
 from django.core.exceptions import ValidationError
 from arches.app.functions.base import BaseFunction
+from arches.app.models.resource import Resource
 import json
 
+
+#TODO: Update UUID's to match live server 
 details = {
     "name": "Generate KMSQ",
     "type": "node",
@@ -22,23 +25,87 @@ details = {
 
 #Methods
 def createNewTile(tile):
+    '''
+    Description:
+    Creates a new Location Qualifer tile 
+    
+    Parameters:
+    :tile: Triggering tile
+    
+    Returns:
+    :new_tile: Returns a new tile with all required data
+    '''
+    
+    #Nodes
     location_qualifiers =  "ffbcc420-8ff9-11ec-9340-00155d9326d1"
-    location = 'ffbcc420-8ff9-11ec-9340-00155d9326d1'
     mapsheet = "19bcfcb4-8ffa-11ec-9340-00155d9326d1"
     kmsq = "12becea6-8ffa-11ec-9340-00155d9326d1"
-    loaction_accuracy = "81194e3e-7dcc-11ec-871b-00155db3508e"
     map_reference = "f58199ea-8ff9-11ec-9340-00155d9326d1"
     
+    #Request new blank tile of resource instance from current resource 
     new_tile = Tile().get_blank_tile_from_nodegroup_id(location_qualifiers, tile.resourceinstance_id)
     
+    #Populate new tile with generated data
     new_tile.data[kmsq] = NRGtoKMSQ(tile.data[map_reference])
     new_tile.data[mapsheet] = NRGtoMapsheet(tile.data[map_reference])
     return new_tile
 
-def NRGtoKMSQ(ngr):   
+def checkIfRefValuesExist(mainTile):
+
+    '''
+    Description:
+    Check whether current tile already has a RecordEdit node exists
+    and if so update it current information
+    
+    Returns:
+    :Bool: True if tile has been found and update/ False if tile has not been found and update 
+    '''
+    #Nodes
+    location_qualifiers =  "ffbcc420-8ff9-11ec-9340-00155d9326d1"
+    mapsheet = "19bcfcb4-8ffa-11ec-9340-00155d9326d1"
+    kmsq = "12becea6-8ffa-11ec-9340-00155d9326d1"
+    map_reference = "f58199ea-8ff9-11ec-9340-00155d9326d1"
+    
+    #Get current resource 
+    res = Resource.objects.get(resourceinstanceid = mainTile.resourceinstance_id)
+    res.load_tiles()
+    print(mainTile.data[map_reference])
+    
+    #For each tile in resource find record edit date tile
+    for tile in res.tiles:
+        print(str(tile.nodegroup_id) == location_qualifiers)
+        print(vars(tile))
+        if str(tile.nodegroup_id) == location_qualifiers:  #If record edit tile exits
+            tile.data[mapsheet] = NRGtoMapsheet(mainTile.data[map_reference])
+            tile.data[kmsq] = NRGtoKMSQ(mainTile.data[map_reference])
+            tile.save() #Update edit date/edited by and save tile
+            
+            return True
+
+    return False
+
+def NRGtoKMSQ(ngr): 
+    '''
+    Description:
+    Returns first two values of eastings and northings
+    
+    Params:
+    :nrg: String passed from tile
+    '''  
     return ngr[:2] + ngr[2:4] + ngr[7:9]
 
+
 def NRGtoMapsheet(nrg):
+    '''
+    Descriptions:
+    Calculates the Mapsheet value
+    
+    Params:
+    :nrg: String passed in from tile
+    
+    Returns:
+    :string: Formatted mapsheet string
+    '''
     first_letter = ""
     second_letter= ""
     first_number = int(nrg[3])
@@ -64,6 +131,9 @@ def NRGtoMapsheet(nrg):
 class GenerateKMSQ(BaseFunction):
 
     def save(self, tile, request):
-        new_tile = createNewTile(tile)
-        new_tile.save()
+        if checkIfRefValuesExist(tile):
+            print("success")
+        else:
+            new_tile = createNewTile(tile)
+            new_tile.save()
         return     
