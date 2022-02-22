@@ -1,39 +1,39 @@
 {% load i18n %}
 <style>
-  table {
-  border-spacing: 0px;
-  border-collapse: collapse;
-  width: 100%;
-  max-width: 100%;
-  margin-top: 15px;
-  margin-bottom: 15px;
-  background-color: transparent; /* Change the background-color of table here */
-  text-align: left;
-}
+    table {
+        border-spacing: 0px;
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        background-color: transparent;
+        /* Change the background-color of table here */
+        text-align: left;
+    }
 
-th {
-  font-weight: bold;
-  border: 1px solid #cccccc;
-  padding: 8px;
-}
+    th {
+        font-weight: bold;
+        border: 1px solid #cccccc;
+        padding: 8px;
+    }
 
-td {
-  border: 1px solid #cccccc;
-  padding: 8px;
-}
+    td {
+        border: 1px solid #cccccc;
+        padding: 8px;
+    }
 </style>
-        <table>
-          <thead>
+<span>Function to automatically updates the unitary authority based on its community. </span>
+<span>as defined in <i>project_name > project_name > functions > generate_node_value.py </i>
+
+    <table>
+        <thead>
             <th>Community</th>
             <th>Unitary Value</th>
-          </thead>
-          <tbody data-bind="foreach: key_val">
-            <tr> 
-              <td><span data-bind="text: $data.key" ></span></td>
-              <td><span data-bind="text: $data.value"></span></td>
+        </thead>
+        <tbody data-bind="foreach: key_val">
+            <tr>
+                <td><span data-bind="text: $data.key"></span></td>
+                <td><span data-bind="text: $data.value"></span></td>
             </tr>
-          </table>
-      </div>
-    </div>
-  </div>
-</div>
+    </table>

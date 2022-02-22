@@ -15,14 +15,16 @@ import json
 
 #TODO: Update UUID's to match live server 
 details = {
-    "name": "Generate KMSQ",
+    "name": "Generate Location Qualifiers",
     "type": "node",
     "description": "Just a sample demonstrating node group selection",
     "defaultconfig": {"triggering_nodegroups": []},
-    "classname": "GenerateKMSQ",
-    "component": "views/components/functions/generate_KMSQ",
+    "classname": "GenerateLocationQualifiers",
+    "component": "views/components/functions/generate_location_qualifiers",
 }
 
+
+#TODO: figure out why renaming broke everything
 #Methods
 def createNewTile(tile):
     '''
@@ -128,9 +130,10 @@ def NRGtoMapsheet(nrg):
     
     return nrg[:2] + nrg[2:3] + nrg[7:8] + second_letter + first_letter
 
-class GenerateKMSQ(BaseFunction):
+class GenerateLocationQualifiers(BaseFunction):
 
     def save(self, tile, request):
+        print("printing saved")
         if checkIfRefValuesExist(tile):
             print("success")
         else:

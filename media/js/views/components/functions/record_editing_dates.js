@@ -11,8 +11,9 @@ function($, ko, FunctionViewModel, chosen, arches) {
             this.triggering_nodegroups = params.config.triggering_nodegroups;
 
             //TODO: Update UUID's to match live server
-            this.triggering_nodegroups(['e420a6e6-8ff9-11ec-bbf3-00155d9326d1','ffbcc420-8ff9-11ec-9340-00155d9326d1'])
+            this.triggering_nodegroups(['e420a6e6-8ff9-11ec-bbf3-00155d9326d1'])
         }
+        //'ffbcc420-8ff9-11ec-9340-00155d9326d1'
         ,
         template: {
             require: 'text!templates/views/components/functions/record_editing_dates.htm'
