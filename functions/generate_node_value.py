@@ -21,7 +21,9 @@ details = {
                       "keys": { 
                         "Cefn Cribwr":"Bridgend",
                         "Pencoed":"Bridgend",
-                        "Coychurch Lower":"Powys"
+                        "Coychurch Lower":"Powys",
+                        "Bettws (Newport)":"Powys",
+                        "Bettws (Powys)" : "Bridgend"
                         }
                       },
     "classname": "UnitaryFunction",
@@ -42,15 +44,19 @@ def createNewTile(keys, source_tile):
     '''
     
     #Nodes
-    unitary_authority = '86e99f1a-9327-11ec-8b2f-00155d9326d1' #Unitary Authority nodegroup uuid
-    ua_value = "7f638dc0-93cf-11ec-a178-00155d9326d1" #Unitary Authority's node uuid
+    unitary_authority = '01340830-94c9-11ec-b43d-00155db05fb1' #Unitary Authority nodegroup uuid
+    ua_value = "01340830-94c9-11ec-b43d-00155db05fb1" #Unitary Authority's node uuid
     
     #UUID's for the right side of the default.config.keys dictionary 
     rhs_key = source_tile.data[list(source_tile.data.keys())[0]] #Always fetch the first element as only one value can be selected
     
     #Request new blank tile of resource instance from unitary authority
-    target_tile = Tile().get_blank_tile_from_nodegroup_id(unitary_authority, source_tile.resourceinstance_id)
+    #Location UUID = bb04598c-94c8-11ec-9a3e-00155db05fb1
     
+    target_tile = Tile().get_blank_tile_from_nodegroup_id(unitary_authority, source_tile.resourceinstance_id)
+    print("Parent tile id" , source_tile.parenttile_id)
+    target_tile.parenttile_id = source_tile.parenttile_id
+    print("Target Tile",vars(target_tile))
     #Add UA data to new tile
     target_tile.data[ua_value] = keys[rhs_key]
 
@@ -107,8 +113,10 @@ def getConcepts(self):
 class UnitaryFunction(BaseFunction):
 
     def save(self, tile, request):
+        print("FIRED!!!!!!!!!!!!!!!!")
         #Get concept UUIDs from word values
         self.config['keys'] = getConcepts(self)
+        #get tile.parent.tile id 
         
         #Variables
         source_tile = tile
@@ -125,7 +133,7 @@ class UnitaryFunction(BaseFunction):
             
             #For each tile check if Unitary Authority tile already exists
             for tile in target_tiles:
-                if str(tile.nodegroup_id) == '86e99f1a-9327-11ec-8b2f-00155d9326d1': #Unitary Authority 
+                if str(tile.nodegroup_id) == '01340830-94c9-11ec-b43d-00155db05fb1': #Unitary Authority 
                     #If so remove it and add the new one, since there can only be one
                     tile.delete()
                     target_tile.save()

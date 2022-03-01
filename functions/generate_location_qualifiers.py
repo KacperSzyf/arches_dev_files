@@ -44,6 +44,9 @@ def createNewTile(tile):
     kmsq = "12becea6-8ffa-11ec-9340-00155d9326d1"
     map_reference = "f58199ea-8ff9-11ec-9340-00155d9326d1"
     
+    
+    print("original tile", vars(tile))
+    
     #Request new blank tile of resource instance from current resource 
     new_tile = Tile().get_blank_tile_from_nodegroup_id(location_qualifiers, tile.resourceinstance_id)
     
