@@ -13,7 +13,7 @@ function($, ko, FunctionViewModel, chosen, arches) {
             this.key_val = ko.observableArray()
             //end params
                                         //Community Value
-            this.triggering_nodegroups(['9589b8ac-9327-11ec-be4f-00155d9326d1'])
+            this.triggering_nodegroups(['c7ae6b6e-94c8-11ec-bb75-00155db05fb1'])
 
             //populate two arrays as a dictionary is not an observable 
             for(key in this.keys) this.key_val.push({"key":key, "value" :  ko.mapping.toJS(this.keys[key])})
