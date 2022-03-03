@@ -53,6 +53,7 @@ class Command(BaseCommand):
             #create a concept for each item in the data
             subconcepts = []
             for value in values[index]:
+                print(value)
                 subconcepts.append(create_concept("Concept", str(value), main_concept))
             
             #append all created concepts to parent concept
@@ -84,7 +85,7 @@ def create_concept(concept_type, data, parent_concept = None):
     c.nodetype = concept_type
     c.conceptid = str(uuid.uuid1())
     c.nodetype_id = concept_type
-    c.legacyoid = data
+    # c.legacyoid = data
     c.save()
     
     #If function has parent concept create a child
@@ -143,7 +144,8 @@ def get_data_and_header(csv_path):
     #Populate an array for each column
     values = []
     for col in csv_df:
-        values.append(list(csv_df[col]))
-    
+        val_set = set(csv_df[col].dropna()) #get all data from columns without duplicates and drop nan's
+        values.append(list(val_set)) #cast the set to a list
+        
     return (headers, values)
     
