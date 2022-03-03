@@ -1,4 +1,4 @@
-
+#imports
 from fileinput import close
 from json.tool import main
 from platform import node
@@ -7,25 +7,12 @@ from termios import ICRNL
 from types import new_class
 from uuid import uuid1, uuid4
 import uuid
-from django.core.management.base import BaseCommand, CommandError
-
-#imports
 import csv
-from arches.app.models import concept
 import sys
-sys.setrecursionlimit(14196)
-
-# from arches.app.models.concept import Concept
-# from arches.app.models.models import Concept, DRelationType 
+from django.core.management.base import BaseCommand, CommandError
 from arches.app.models.concept import Concept, ConceptValue
-from arches.app.models.models import DNodeType, Value
-from arches.app.models.models import Relation
 
-
-# from arches.app.models.concept import Concept
-
-#Core Arches
-# from arches.app.models.concept import Concept
+sys.setrecursionlimit(14196) # TODO: This needs sorting, its dodgy 
 
 class Command(BaseCommand):
     """
@@ -43,41 +30,51 @@ class Command(BaseCommand):
         
 
     def handle(self, *args, **options):
-    
         #Load CSV
         csv_path = options['file_path']
-        create_concept_scheme() # does nothing other than printing some stuff 
 
+        #Get data to process
+        #data_tuple[0] = header, data_tuple[1] = countries 
         data_tuple = get_countries_and_header(csv_path) #splits the csv into title and a list of countries
-        print(data_tuple[1])
-        main_concept  = create_concept("ConceptScheme", data_tuple[0]) # creates a the main concepts
-        print(vars(main_concept))
-        breakpoint()
-        main_concept.save()
-        # print(vars(main_concept[0]))
-        # print(vars(main_concept[1]))
         
-        # print("val", main_concept[0].values)
+        #Create the parent concept
+        main_concept  = create_concept("ConceptScheme", data_tuple[0]) # creates a the main concepts
+        main_concept.save()
+        
+        #create a concept for each item in the datat_uple
         concepts = []
         for country in data_tuple[1]:
-            # main_concept.subconcepts.append(create_concept("Concept", country, main_concept ))
             concepts.append(create_concept("Concept", country, main_concept))
-        # main_concept.save()
-        breakpoint
+
+        #add all the subconcepts to parent concepts 
         main_concept.subconcepts = concepts # concepts = list of all subconcepts 
         main_concept.save()
-        print(vars(main_concept))
-        print(data_tuple[0], data_tuple[1][1]) #43
 
 
-def create_concept(concept_type, data, subconcept = None):
+def create_concept(concept_type, data, parent_concept = None):
+    '''
+    Descriptions:
+    Function to create a concept and its value (if needed)
+     
+    Parameters:
+    :concept_type: string deciding what type of concept is to be made
+    :data: string containing the data to be stored in concept.data
+    :parent_concept: a Concept object to be referenced as a parent for the new Concept being created
+    
+    Returns:
+    :c: the concept object being created
+    '''
+    
+    #Create the base concept
     c = Concept()
     c.id = uuid.uuid1()
     c.nodetype = concept_type
     c.conceptid = uuid.uuid1()
     c.nodetype_id = concept_type
-    if subconcept:
-        c.parentconcepts.append(subconcept)
+    
+    #Decide if concept is a parent or a child 
+    if parent_concept:
+        c.parentconcepts.append(parent_concept)
         c.relationshiptype = 'narrower'
     else:
         c.relationshiptype = 'hasTopConcept'
@@ -86,37 +83,36 @@ def create_concept(concept_type, data, subconcept = None):
     c.legacyoid = data
     c.save()
     
+    #Create a value for the concept
     val = ConceptValue()
     val.conceptid = c.id
     val.type = 'prefLabel'
     val.category = "label"
     val.value = data
     val.language = 'en'
-    
     val.save()
-    if subconcept:
+    
+    #If the concept is a child add the value created to itself
+    if parent_concept:
         c.values = []
     else:
         c.values.append(val)
     
-    
-    
     return c
     
-    
-def create_concept_scheme():
-    concept = Concept().get(
-                id='117cddf0-8403-4e16-b325-43327efc9e1f',
-                include_subconcepts=True,
-                include_parentconcepts=True,
-                include_relatedconcepts=True,
-                depth_limit=None,
-                up_depth_limit=None,
-            )
-    print(vars(concept))
-    print(vars(concept.subconcepts[0]))
-    
 def get_countries_and_header(csv_path):
+    '''
+    Description:
+    Function to take a one column list stored as a CSV and return a tuple with
+    a header and datalist
+    
+    Parameters:
+    :csv_path: Filepath to the csv file
+    
+    Returns:
+    :tuple: containing Header of the CSV file 
+    '''
+    
     header = ""
     countries = []
     
@@ -130,6 +126,5 @@ def get_countries_and_header(csv_path):
                 header = list(row.keys())[0]
                 first = False
             countries.append(row["Country"])
-    print("countriers", len(countries))
     return (header, countries)
     
