@@ -54,9 +54,8 @@ def createNewTile(keys, source_tile):
     #Location UUID = bb04598c-94c8-11ec-9a3e-00155db05fb1
     
     target_tile = Tile().get_blank_tile_from_nodegroup_id(unitary_authority, source_tile.resourceinstance_id)
-    print("Parent tile id" , source_tile.parenttile_id)
     target_tile.parenttile_id = source_tile.parenttile_id
-    print("Target Tile",vars(target_tile))
+
     #Add UA data to new tile
     target_tile.data[ua_value] = keys[rhs_key]
 

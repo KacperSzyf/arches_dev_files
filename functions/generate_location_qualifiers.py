@@ -136,7 +136,6 @@ def NRGtoMapsheet(nrg):
 class GenerateLocationQualifiers(BaseFunction):
 
     def save(self, tile, request):
-        print("printing saved")
         if checkIfRefValuesExist(tile):
             print("success")
         else:
