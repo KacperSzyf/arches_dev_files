@@ -14,7 +14,15 @@ from arches.app.models.concept import Concept, ConceptValue
 class Command(BaseCommand):
     """
     Description:
-    This command takes a .csv file containing a list of countries to create Concept Schemes based on them 
+    This command takes a .csv file containing a list of countries to create Concept Schemes based on them
+    The csv can only be one column with a header
+    Example:
+    
+    header,
+    data1,
+    data2,
+    data3,
+    
     Parameters:
     '-s': path to .csv
     Returns:
