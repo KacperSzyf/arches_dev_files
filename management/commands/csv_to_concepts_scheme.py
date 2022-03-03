@@ -9,19 +9,21 @@ from uuid import uuid1, uuid4
 import uuid
 import csv
 from django.core.management.base import BaseCommand, CommandError
+from numpy import append
 from arches.app.models.concept import Concept, ConceptValue
+import pandas as pd
 
 class Command(BaseCommand):
     """
     Description:
     This command takes a .csv file containing a list of countries to create Concept Schemes based on them
-    The csv can only be one column with a header
+  
     Example:
     
-    header,
-    data1,
-    data2,
-    data3,
+    header1,header2,header3
+    data1,data2,data3
+    data1,data2,data3
+    data1,data2,data3
     
     Parameters:
     '-s': path to .csv
@@ -35,33 +37,32 @@ class Command(BaseCommand):
         
 
     def handle(self, *args, **options):
-        #Load CSV
+        #Load CSV filepath
         csv_path = options['file_path']
 
         #Get data to process
         data_tuple = get_data_and_header(csv_path) #splits the csv into title and a list of countries
-        header = data_tuple[0]
-        data = data_tuple[1]
+        headers = data_tuple[0]
+        values = data_tuple[1]
         
-        #Create the parent concept
-        main_concept  = create_concept("ConceptScheme", header) # creates a the main concepts
-        main_concept.save()
-        
-        #create a concept for each item in the data
-        concepts = []
-        for d in data:
-            concepts.append(create_concept("Concept", d, main_concept))
-
-        #append all created concepts to parent concept
-        main_concept.subconcepts = concepts # concepts = list of all subconcepts
-        
-        #Save parent concept to db
-        main_concept.save()
-        
-        #Create a collection from parent concept
-        main_concept.make_collection()
-        
-
+        #Create parent concepts for each header
+        for index, header in enumerate(headers):
+            main_concept  = create_concept("ConceptScheme", header) # creates a the main concepts
+            main_concept.save()
+            
+            #create a concept for each item in the data
+            subconcepts = []
+            for value in values[index]:
+                subconcepts.append(create_concept("Concept", str(value), main_concept))
+            
+            #append all created concepts to parent concept
+            main_concept.subconcepts = subconcepts
+            
+            #Save parent concept to db
+            main_concept.save()
+            
+            #Create a collection from parent concept
+            main_concept.make_collection()
 
 def create_concept(concept_type, data, parent_concept = None):
     '''
@@ -133,20 +134,16 @@ def get_data_and_header(csv_path):
     :tuple: containing Header of the CSV file 
     '''
     
-    header = ""
-    data = []
+    #Open the csv file as a dataframe
+    csv_df = pd.read_csv(csv_path)
     
-    first = True
-    #Open target file as a dictionary
-    with open (csv_path, newline="") as csv_file:
-        csv_reader = csv.DictReader(csv_file, delimiter=',')
-        #Loop over all lines in csv reader
-        for row in csv_reader:
-            #If it is the first time going around the loop set header
-            if first:
-                header = list(row.keys())[0]
-                first = False
-            #append the data under the header key to a new list
-            data.append(row[list(row.keys())[0]]) #list(row.keys())[0] = Header
-    return (header, data)
+    #Cast dataframe column names to list
+    headers = list(csv_df.columns)
+    
+    #Populate an array for each column
+    values = []
+    for col in csv_df:
+        values.append(list(csv_df[col]))
+    
+    return (headers, values)
     
