@@ -46,7 +46,7 @@ define([
     }
 
     return ko.components.register(
-        "views/components/functions/eamena-permissions",
+        "views/components/functions/ringfencing",
         {
             viewModel: function (params) {
                 FunctionViewModel.apply(this, arguments);
@@ -59,6 +59,7 @@ define([
                 this.concept_nodes = ko.observableArray();
                 this.concept_node = ko.observable();
                 this.initialUsers = ko.observableArray();
+                this.loading = ko.observable(false);
                 this.triggering_nodegroups = params.config.triggering_nodegroups;
 
                 ConceptSelectViewModel.apply(this, [params]);
@@ -182,7 +183,9 @@ define([
                     || newRule.selectedVal() == null)) alert("Can't add empty rule!")
                     else
                     if (ruleExists(self.rules, newRule)) alert("Rule already exists!");
-                    else self.rules.push(newRule);
+                    else{
+                        self.rules.push(newRule);
+                    } 
                 };
                 //COMPLETE:
 
@@ -225,16 +228,8 @@ define([
             },
             template: {
                 require:
-                    "text!templates/views/components/functions/eamena-permissions.htm",
+                    "text!templates/views/components/functions/ringfencing.htm",
             },
         }
     );
 });
-
-
-//REVIEW: Questions : 
-//                 How did we get the UI to populate dynamically ? FIXME:self.selectedNode( rule.selectedNode) ----- COMPLETE:
-//                 How did we get the get nodes to work again ? FIXME: graphs.nodes.find line 152
-//                 arches.url is undefined even though I'm importing arches at the top, what do? ------ COMPLETE:
-//                 this.selectedVal.subscribe() is firing twice, have you got any ideas as to why ? --- COMPLETE: It's not being called anywhere else FIXME: is selectedVal is not null
-//                 Should we ad some functionality to update the rule if they push a rule, and then decided to change the permissions on the same screen  ?
