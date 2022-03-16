@@ -19,11 +19,12 @@ details = {
     "description": "Just a sample demonstrating node group selection",
     "defaultconfig": {"triggering_nodegroups": [],
                       "keys": { 
-                        "Cefn Cribwr":"Bridgend",
-                        "Pencoed":"Bridgend",
-                        "Coychurch Lower":"Powys",
-                        "Bettws (Newport)":"Powys",
-                        "Bettws (Powys)" : "Bridgend"
+                        "Fair":"Mature",
+                        "Dead":"Veteran",
+                        "Excellent":"Mature",
+                        "Good":"Mature",
+                        "Poor":"Mature",
+                        "Not applicable":"Mature",
                         }
                       },
     "classname": "UnitaryFunction",
@@ -44,8 +45,8 @@ def createNewTile(keys, source_tile):
     '''
     
     #Nodes
-    unitary_authority = '01340830-94c9-11ec-b43d-00155db05fb1' #Unitary Authority nodegroup uuid
-    ua_value = "01340830-94c9-11ec-b43d-00155db05fb1" #Unitary Authority's node uuid
+    unitary_authority = '0b1e0bd0-9f95-11ec-8951-00155d22601c' #Unitary Authority nodegroup uuid
+    ua_value = "0b1e0bd0-9f95-11ec-8951-00155d22601c" #Unitary Authority's node uuid
     
     #UUID's for the right side of the default.config.keys dictionary 
     rhs_key = source_tile.data[list(source_tile.data.keys())[0]] #Always fetch the first element as only one value can be selected
@@ -74,8 +75,8 @@ def getConcepts(self):
     'new_keys': Returns the original dictionary with words converted to UUID's
     '''
     #source_thesauri_id
-    source_thesauri_id = "6718532c-1bf4-41e0-9243-ff605a6bf168" # to be changed  community value thesauri uuid
-    target_thesauri_id = "691be2ee-a3fc-4b38-be2d-7752e5f4d927" # to be changed unitary authority thesauri uuid
+    source_thesauri_id = "06cf74db-f2b8-46a9-8c2f-565bedaa6424" # to be changed  community value thesauri uuid
+    target_thesauri_id = "117cddf0-8403-4e16-b325-43327efc9e1f" # to be changed unitary authority thesauri uuid
     
     new_keys = {}
 
@@ -120,7 +121,7 @@ class UnitaryFunction(BaseFunction):
         #Variables
         source_tile = tile
         print(f'srouce tile: {vars(source_tile)}')
-        exists = False
+        # exists = False
 
         #Create target tile 
         target_tile = createNewTile(self.config['keys'], source_tile)
@@ -132,15 +133,14 @@ class UnitaryFunction(BaseFunction):
             
             #For each tile check if Unitary Authority tile already exists
             for tile in target_tiles:
-                if str(tile.nodegroup_id) == '01340830-94c9-11ec-b43d-00155db05fb1': #Unitary Authority 
+                # if str(tile.nodegroup_id) == '0b1e0bd0-9f95-11ec-8951-00155d22601c': #Unitary Authority 
                     #If so remove it and add the new one, since there can only be one
-                    tile.delete()
-                    target_tile.save()
-                    return
+                tile.delete()
+                    # target_tile.save()
 
         #If no target tiles exist just save a new tile   
-        if not exists:
-            target_tile.save()
+        # if not exists:
+        target_tile.save()
             
         return
                 
