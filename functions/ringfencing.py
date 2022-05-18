@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 """ 
 A function designed to apply resource instance permissions en masse, based upon that resource containing
 a specified concept(s). 
+
 Data required from front-end component:
 1. Nodegroup id                                selected_nodegroup
 2. Node id                                     target_node
@@ -57,12 +58,12 @@ class Ringfencing(BaseFunction):
         # node = self.config['selected_node']
         # value = self.config['selected_val']
         # identities = self.config['user_groups']
-
         
         if len(rules) > 0:
             for rule in rules:
                 # Check if tile.data has selectedNode and selectedVal
                 if  data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
+                    
 
                     # Get the resource that is currently being saved
                     resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
@@ -94,18 +95,47 @@ class Ringfencing(BaseFunction):
 
                     resource = Resource(str(resource_instance.resourceinstanceid))
                     resource.index()
-
+                else:
+                    for rule in rules:
+                        remove_permissions(tile)    
 
 # write test, verify that the resource instance permissions are as expected. 
 # call ES, get instance and check it is indexed as expected 
 # call django gaurdian get_group_perms + get_user_perms,
 
 
-    # def delete(self, tile, request):
-    #     raise NotImplementedError
-
+    def delete(self, tile, request):
+        data = tile.data
+        rules = self.config['rules']
+        
+        if len(rules) > 0:
+            for rule in rules:
+                # Check if tile.data has selectedNode and selectedVal
+                if  data[rule['selectedNode']] and data[rule['selectedNode']] in rule['selectedVal']:
+                   remove_permissions(tile)
+        
     # def on_import(self, tile):
     #     raise NotImplementedError
 
     # def after_function_save(self, functionxgraph, request):
     #     raise NotImplementedError
+
+def remove_permissions(tile):
+         # Get the resource that is currently being saved
+        resource_instance = models.ResourceInstance.objects.get(pk=tile.resourceinstance_id)
+        resource = Resource.objects.get(pk=tile.resourceinstance_id)
+
+        # Get a dictionary of users id's with ANY restrictions on the resource
+        current_perms = get_restricted_users(resource)
+
+        # Get a dictionary of users with 'no_access' restriction on the current resource
+        current_restricted_users = {User.objects.get(pk=userid) for userid in current_perms['no_access']}
+        
+        #Remove permissions for current resource 
+        for identityModel in (current_restricted_users): 
+            # first remove all the current permissions
+            for perm in get_perms(identityModel, resource_instance):
+                remove_perm(perm, identityModel, resource_instance)
+        
+        resource = Resource(str(resource_instance.resourceinstanceid))
+        resource.index()

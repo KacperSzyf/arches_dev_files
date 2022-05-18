@@ -12,8 +12,8 @@ class Command(BaseCommand):
     """
     def handle(self, *args, **options):
         #Get Ringfencing function
-        ringfencing_func_id = 'c88ee87c-9bb4-11ec-8be3-00155d324519' #Replace with local uuid
-        ringfencing = FunctionXGraph.objects.get(pk = ringfencing_func_id)
+        ringfencing_func_id = 'be239b0a-145d-4e27-bb71-beaa855dcc11' #Replace with local uuid
+        ringfencing = FunctionXGraph.objects.get(function_id = ringfencing_func_id)
         
         #Get all triggering nodegroups from the ringfencing function
         triggeringNodeGroups = ringfencing.config['triggering_nodegroups']

@@ -115,19 +115,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                         <!-- ko if: filter.type === 'popup' && filter.enabled -->
                         {% if user_can_read %}
                         <!-- ko if: filter.name === "Saved"-->
-                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
+                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;max-height: 50px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
                             <span>Historic Themes</span>
                         </button>
                         <!-- /ko -->
                         <!-- ko if: filter.name === "Time Filter"-->
-                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
+                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;max-height: 50px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
                             <span>Date Interval</span>
                         </button>
                         <!-- /ko -->
                         <!-- ko if: filter.name === "Search Export"-->
-                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
+                        <button class="saved-search-container search-type-btn-popup relative" style="min-width: 150px;max-height: 50px;" data-bind="css: {'active': $parent.sharedStateObject.selectedPopup() === filter.componentname}, click: function(){$parent.sharedStateObject.selectPopup(filter.componentname); setTimeout(function() {$(window).trigger('resize');}, 100);}">
                             <i data-bind="css: filter.icon"></i>
                             <span>Download Results</span>
                         </button>

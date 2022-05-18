@@ -21,9 +21,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 {% load template_tags %}
 {% load i18n %}
 
+{% block css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/layout-tweaks.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/header.css' %}" />
+
+{% endblock css%}
 
 {% block body %}
 
+{% include 'partials/site-header.htm' %}
 
 
     <div class="wrapper">
